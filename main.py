@@ -36,10 +36,10 @@ class Laser:
         window.blit(self.img, (self.x, self.y))
 
     def move(self, vel):
-        self.y += vel
+        self.x -= vel
 
-    def off_screen(self, height):
-        return not(self.y < height and self.y >= 0)
+    def off_screen(self, width):
+        return (self.x > width or self.x <= -50)
     
     def collision(self, obj):
         return collide(self, obj)
@@ -65,7 +65,7 @@ class Ship:
         self.cooldown()
         for laser in self.lasers:
             laser.move(vel)
-            if laser.off_screen(HEIGHT):
+            if laser.off_screen(WIDTH):
                 self.lasers.remove(laser)
             elif laser.collision(obj):
                 obj.health -= 10
@@ -132,7 +132,7 @@ class Enemy(Ship):
         self.mask = pygame.mask.from_surface(self.ship_img)
 
     def move(self, vel):
-        self.y += vel
+        self.x -= vel
 
     def shoot(self):
         if self.cool_down_counter == 0:
@@ -160,10 +160,10 @@ def main():
     wave_length = 5
     
     enemy_vel = 1
-    player_vel = 5
+    player_vel = 7
     laser_vel = 8
 
-    player = Player(300, 630)
+    player = Player(100, 300)
 
     clock = pygame.time.Clock()
 
@@ -207,7 +207,7 @@ def main():
             level += 1
             wave_length += 5
             for i in range(wave_length):
-                enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-1500, -100), random.choice(["red", "blue", "green"]))
+                enemy = Enemy(random.randrange(WIDTH, WIDTH + 1000), random.randrange(100, HEIGHT - 100), random.choice(["red", "blue", "green"]))
                 enemies.append(enemy)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -228,13 +228,14 @@ def main():
             enemy.move(enemy_vel)
             enemy.move_lasers(laser_vel, player)
 
-            if random.randrange(0, 2*60) == 1:
+            if random.randrange(0, 3*60) == 1:
                 enemy.shoot()
 
             if collide(enemy, player):
                 player.health -= 10
                 enemies.remove(enemy)
-            elif enemy.y + enemy.get_height() > HEIGHT:
+                
+            elif enemy.x - enemy.get_width() < -50:
                 lives -= 1
                 enemies.remove(enemy)
             
