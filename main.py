@@ -243,7 +243,13 @@ def main():
             
 
         player.move_lasers(laser_vel, enemies)
+
+class Menu:
+    def __init__():
+        self.title_font = pygame.font.SysFont("comicsans", 70)
+        self.run = True
         
+
 def main_menu():
     title_font = pygame.font.SysFont("comicsans", 70)
     run = True
@@ -258,6 +264,7 @@ def main_menu():
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 main()
+
     pygame.quit()
 
 
