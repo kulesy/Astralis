@@ -195,56 +195,59 @@ class Game:
         while self.run:
             self.clock.tick(self.FPS)
             self.redraw_window()
-
-            if self.lives <= 0 or self.player.health <= 0:
-                self.lost = True
-                self.lost_count += 1
-            
-            if self.lost:
-                if self.lost_count > self.FPS * 3:
-                    self.run = False
-                else:
-                    continue
-            if len(self.enemies) == 0: 
-                self.level += 1
-                self.wave_length += 5
-                for i in range(self.wave_length):
-                    enemy = Enemy(random.randrange(WIDTH, WIDTH + 1000), random.randrange(100, HEIGHT - 100), random.choice(["red", "blue", "green"]))
-                    self.enemies.append(enemy)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    quit()
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_a] and self.player.x - self.player_vel > 0: # Left
-                self.player.x -= self.player_vel
-            if keys[pygame.K_d] and self.player.x + self.player_vel + self.player.get_width() < WIDTH: # Right
-                self.player.x += self.player_vel
-            if keys[pygame.K_w] and self.player.y - self.player_vel > 0: # Up
-                self.player.y -= self.player_vel
-            if keys[pygame.K_s] and self.player.y + self.player_vel + self.player.get_height() < HEIGHT: # Down
-                self.player.y += self.player_vel
-            if keys[pygame.K_SPACE]: # Shoot
-                self.player.shoot()
-            
-            for enemy in self.enemies[:]:
-                enemy.move(self.enemy_vel)
-                enemy.move_lasers(self.laser_vel, self.player)
-
-                if random.randrange(0, 3*60) == 1:
-                    enemy.shoot()
-
-                if self.collide(enemy, self.player):
-                    self.player.health -= 10
-                    self.enemies.remove(enemy)
-                    
-                elif enemy.x - enemy.get_width() < -50:
-                    self.lives -= 1
-                    self.enemies.remove(enemy)
-                
-
-                
-
+            self.game_status()
+            self.check_events()
+            self.enemy_behaviour()
             self.player.move_lasers(self.laser_vel, self.enemies)
+
+    def check_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a] and self.player.x - self.player_vel > 0: # Left
+            self.player.x -= self.player_vel
+        if keys[pygame.K_d] and self.player.x + self.player_vel + self.player.get_width() < WIDTH: # Right
+            self.player.x += self.player_vel
+        if keys[pygame.K_w] and self.player.y - self.player_vel > 0: # Up
+            self.player.y -= self.player_vel
+        if keys[pygame.K_s] and self.player.y + self.player_vel + self.player.get_height() < HEIGHT: # Down
+            self.player.y += self.player_vel
+        if keys[pygame.K_SPACE]: # Shoot
+            self.player.shoot()
+
+    def game_status(self):
+        if self.lives <= 0 or self.player.health <= 0:
+            self.lost = True
+            self.lost_count += 1
+        
+        if self.lost:
+            if self.lost_count > self.FPS * 3:
+                self.run = False
+            else:
+                self.game_loop()
+        if len(self.enemies) == 0: 
+            self.level += 1
+            self.wave_length += 5
+            for i in range(self.wave_length):
+                enemy = Enemy(random.randrange(WIDTH, WIDTH + 1000), random.randrange(100, HEIGHT - 100), random.choice(["red", "blue", "green"]))
+                self.enemies.append(enemy)
+
+    def enemy_behaviour(self):
+        for enemy in self.enemies[:]:
+            enemy.move(self.enemy_vel)
+            enemy.move_lasers(self.laser_vel, self.player)
+
+            if random.randrange(0, 3*60) == 1:
+                enemy.shoot()
+
+            if self.collide(enemy, self.player):
+                self.player.health -= 10
+                self.enemies.remove(enemy)
+                
+            elif enemy.x - enemy.get_width() < -50:
+                self.lives -= 1
+                self.enemies.remove(enemy)
 
 def main_menu():
     title_font = pygame.font.SysFont("comicsans", 70)
@@ -259,7 +262,8 @@ def main_menu():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                Game().game_loop()
+                game = Game()
+                game.game_loop()
     pygame.quit()
 
 game = Game()
