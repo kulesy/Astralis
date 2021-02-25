@@ -165,6 +165,13 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.lost_count = 0
+
+        self.W_KEY = False
+        self.A_KEY = False
+        self.S_KEY = False
+        self.D_KEY = False
+        self.START_KEY = False
+        self.BACK_KEY = False
     
     def collide(self, obj1, obj2):
         offset_x = obj2.x - obj1.x
@@ -206,15 +213,23 @@ class Game:
                 quit()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] and self.player.x - self.player_vel > 0: # Left
-            self.player.x -= self.player_vel
+            self.W_KEY = True
+            # self.player.x -= self.player_vel
         if keys[pygame.K_d] and self.player.x + self.player_vel + self.player.get_width() < WIDTH: # Right
-            self.player.x += self.player_vel
+            self.W_KEY = True
+            # self.player.x += self.player_vel
         if keys[pygame.K_w] and self.player.y - self.player_vel > 0: # Up
-            self.player.y -= self.player_vel
+            self.W_KEY = True
+            # self.player.y -= self.player_vel
         if keys[pygame.K_s] and self.player.y + self.player_vel + self.player.get_height() < HEIGHT: # Down
-            self.player.y += self.player_vel
+            self.W_KEY = True
+            # self.player.y += self.player_vel
         if keys[pygame.K_SPACE]: # Shoot
-            self.player.shoot()
+            self.SPACE_KEY = True
+            # self.player.shoot()
+        if keys[pygame.K_ESCAPE]: # Shoot
+            self.ESCAPE_KEY = True
+            # self.player.shoot()
 
     def game_status(self):
         if self.lives <= 0 or self.player.health <= 0:
@@ -250,7 +265,7 @@ class Game:
                 self.enemies.remove(enemy)
     
     def reset_keys(self):
-        self.UP_KEY, self.DOWN_KEY, self.START_KEY, self.BACK_KEY = False, False, False, False
+        self.W_KEY, self.A_KEY, self.S_KEY, self.D_KEY = False, False, False, False, False, False
 
     def draw_text(self, text, size, x, y ):
         font = pygame.font.Font(self.font_name,size)
@@ -262,7 +277,7 @@ class Game:
 class Menu:
     def __init__(self, game):
         self.game = game
-        self.mid_w, self.mid_h = self.game.DISPLAY_W / 2, self.game.DISPLAY_H / 2
+        self.mid_w, self.mid_h = WIDTH / 2, HEIGHT / 2
         self.run_display = True
         self.cursor_rect = pygame.Rect(0, 0, 20, 20)
         self.offset = - 100
@@ -275,23 +290,44 @@ class Menu:
         pygame.display.update()
         self.game.reset_keys()
     
-        
-def main_menu():
-    title_font = pygame.font.SysFont("comicsans", 70)
-    run = True
-    while run:
-        WIN.blit(BG, (0,0))
-        title_label = title_font.render("Press the mouse to begin...", 1, (255,255,255))
-        WIN.blit(title_label, (WIDTH/2 - title_label.get_width()/2, 350))
+class MainMenu(Menu):
+    def __init__(self, game):
+        Menu.__init__(self, game)
+        self.state = "Start"
+        self.startx, self.starty = self.mid_w, self.mid_h + 30
+        self.optionsx, self.optionsy = self.mid_w, self.mid_h + 50
+        self.creditsx, self.creditsy = self.mid_w, self.mid_h + 70
+        self.cursor_rect.midtop = (self.startx + self.offset, self.starty)
+    
+    def display_menu(self):
+        self.run_display = True
+        while self.run_display:
+            self.game.check_events()
+            self.game.display.fill(self.game.BLACK)
+            self.game.draw_text('Main Menu', 20, WIDTH / 2, HEIGHT / 2 - 20)
+            self.game.draw_text('Start Game', 20, self.startx, self.starty)
+            self.game.draw_text('Options', 20, self.optionsx, self.optionsy)
+            self.game.draw_text('Start Game', 20, self.creditsx, self.creditsy)
+    def move_cursor(self): 
+        if self.game. 
+            
 
-        pygame.display.update()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                game = Game()
-                game.game_loop()
-    pygame.quit()
+    def main_menu():
+        title_font = pygame.font.SysFont("comicsans", 70)
+        run = True
+        while run:
+            WIN.blit(BG, (0,0))
+            title_label = title_font.render("Press the mouse to begin...", 1, (255,255,255))
+            WIN.blit(title_label, (WIDTH/2 - title_label.get_width()/2, 350))
+
+            pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    game = Game()
+                    game.game_loop()
+        pygame.quit()
 
 game = Game()
 main_menu()        
