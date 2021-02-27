@@ -93,7 +93,7 @@ class Ship:
 
 
 class Player(Ship):
-    def __init__(self, x, y, health=100):
+    def __init__(self, x, y, health=5):
         super().__init__(x, y, health)
         self.ship_img = YELLOW_SPACE_SHIP   
         self.laser_img = YELLOW_LASER
@@ -177,6 +177,28 @@ class Game:
         self.START_KEY = False
         self.BACK_KEY = False
     
+    def game_reset(self):
+        self.run = True
+        self.lost = False
+        self.level = 0
+        self.lives = 5
+        self.enemies = []
+        self.wave_length = 5
+        self.enemy_vel = 1
+        self.player_vel = 7
+        self.laser_vel = 8
+        self.mainmenu = MainMenu()
+        self.endmenu = EndMenu()
+        self.lost_count = 0
+        self.W_KEY = False
+        self.A_KEY = False
+        self.S_KEY = False
+        self.D_KEY = False
+        self.SPACE_KEY = False
+        self.START_KEY = False
+        self.BACK_KEY = False
+
+    
     def collide(self, obj1, obj2):
         offset_x = obj2.x - obj1.x
         offset_y = obj2.y - obj1.y
@@ -258,6 +280,7 @@ class Game:
         
         if self.lost:
             if self.lost_count > FPS * 3:
+                self.run = False
                 self.endmenu.display_menu()
             else:
                 self.game_loop()
@@ -286,7 +309,7 @@ class Game:
                 self.enemies.remove(enemy)
     
     def reset_keys(self):
-        self.W_KEY, self.A_KEY, self.S_KEY, self.D_KEY, self.SPACE_KEY, self.ENTER_KEY, self.BACK_KEY = False, False, False, False, False, False, False
+        self.W_KEY, self.A_KEY, self.S_KEY, self.D_KEY, self.SPACE_KEY, self.START_KEY, self.BACK_KEY = False, False, False, False, False, False, False
 
     def draw_text(self, text, size, x, y ):
         font = pygame.font.SysFont("comicsans", size)
@@ -375,6 +398,7 @@ class EndMenu(Menu):
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
     
     def display_menu(self):
+        print('hi')
         self.run_display = True
         while self.run_display:
             game.clock.tick(FPS)
@@ -394,7 +418,7 @@ class EndMenu(Menu):
             elif self.state == 'Exit':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
                 self.state = 'Start'
-        elif game.S_KEY:
+        elif game.W_KEY:
             if self.state == 'Start':
                 self.cursor_rect.midtop = (self.exitx + self.offset, self.exity + 10)
                 self.state = 'Exit'
@@ -405,7 +429,8 @@ class EndMenu(Menu):
         self.move_cursor()
         if game.START_KEY:
             if self.state == 'Start':
-                game.run = True
+                print('hi')
+                game.game_reset()
                 game.game_loop()
             if self.state == 'Exit':
                 pygame.quit()
