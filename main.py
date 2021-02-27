@@ -260,7 +260,7 @@ class Game:
             if self.lost_count > FPS * 3:
                 self.endmenu.display_menu()
             else:
-               pygame.quit()
+                self.game_loop()
                
         if len(self.enemies) == 0: 
             self.level += 1
