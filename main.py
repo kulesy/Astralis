@@ -436,6 +436,6 @@ class EndMenu(Menu):
                 pygame.quit()
             self.run_display = False
 
-game = Game()
+game = Game()0d505fe38e4c6c37ba962e2eacc47d1f5f93b1ee
 game.game_loop()
 
