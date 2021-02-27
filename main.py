@@ -2,7 +2,7 @@ import pygame
 import os
 import time
 import random
-pygame.font.init()
+pygame.init()
 
 FPS = 60
 BLACK, WHITE = (0, 0, 0), (255, 255, 255)
@@ -182,6 +182,9 @@ class Game:
         self.lost = False
         self.level = 0
         self.lives = 5
+        self.main_font = pygame.font.SysFont("comicsans", 50)
+        self.lost_font = pygame.font.SysFont("comicsans", 60)
+        self.display = pygame.Surface((WIDTH, HEIGHT))
         self.enemies = []
         self.wave_length = 5
         self.enemy_vel = 1
@@ -189,14 +192,10 @@ class Game:
         self.laser_vel = 8
         self.mainmenu = MainMenu()
         self.endmenu = EndMenu()
+        self.player = Player(100, 300)
+        self.clock = pygame.time.Clock()
         self.lost_count = 0
-        self.W_KEY = False
-        self.A_KEY = False
-        self.S_KEY = False
-        self.D_KEY = False
-        self.SPACE_KEY = False
-        self.START_KEY = False
-        self.BACK_KEY = False
+        self.reset_keys()
 
     
     def collide(self, obj1, obj2):
@@ -398,7 +397,6 @@ class EndMenu(Menu):
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
     
     def display_menu(self):
-        print('hi')
         self.run_display = True
         while self.run_display:
             game.clock.tick(FPS)
@@ -429,13 +427,12 @@ class EndMenu(Menu):
         self.move_cursor()
         if game.START_KEY:
             if self.state == 'Start':
-                print('hi')
                 game.game_reset()
                 game.game_loop()
             if self.state == 'Exit':
                 pygame.quit()
             self.run_display = False
 
-game = Game()0d505fe38e4c6c37ba962e2eacc47d1f5f93b1ee
+game = Game()
 game.game_loop()
 
