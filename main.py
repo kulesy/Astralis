@@ -4,6 +4,8 @@ import time
 import random
 pygame.font.init()
 
+FPS = 60
+BLACK, WHITE = (0, 0, 0), (255, 255, 255)
 WIDTH, HEIGHT = 750, 750
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter Tutorial")
@@ -146,11 +148,12 @@ class Game:
         self.run = True
         self.lost = False
        
-        self.FPS = 60
         self.level = 0
         self.lives = 5
         self.main_font = pygame.font.SysFont("comicsans", 50)
         self.lost_font = pygame.font.SysFont("comicsans", 60)
+
+        self.display = pygame.Surface((WIDTH, HEIGHT))
 
         self.enemies = []
         self.wave_length = 5
@@ -160,6 +163,7 @@ class Game:
         self.laser_vel = 8
         
         self.mainmenu = MainMenu()
+        self.endmenu = EndMenu()
         self.player = Player(100, 300)
         self.clock = pygame.time.Clock()
 
@@ -200,48 +204,52 @@ class Game:
 
     def game_loop(self):
         while self.run:
-            self.clock.tick(self.FPS)
-            self.mainmenu.display_menu()
+            self.clock.tick(FPS)
+            if self.mainmenu.run_display == True:
+                self.mainmenu.display_menu()
             self.redraw_window()
             self.game_status()
-            self.check_events()
             self.player_events()
             self.enemy_behaviour()
             self.player.move_lasers(self.laser_vel, self.enemies)
+            self.reset_keys()
 
     def check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a] and self.player.x - self.player_vel > 0: 
-            self.A_KEY = True
-        if keys[pygame.K_d] and self.player.x + self.player_vel + self.player.get_width() < WIDTH: 
-            self.D_KEY = True
-        if keys[pygame.K_w] and self.player.y - self.player_vel > 0:
-            self.W_KEY = True
-        if keys[pygame.K_s] and self.player.y + self.player_vel + self.player.get_height() < HEIGHT:
-            self.S_KEY = True
-        if keys[pygame.K_SPACE]:
-            self.SPACE_KEY = True
-        if keys[pygame.K_RETURN]: 
-            self.ENTER_KEY = True
-        if keys[pygame.K_ESCAPE]:
-            self.BACK_KEY = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a: 
+                    self.A_KEY = True
+                if event.key == pygame.K_d: 
+                    self.D_KEY = True
+                if event.key == pygame.K_w: 
+                    self.W_KEY = True
+                if event.key == pygame.K_s: 
+                    self.S_KEY = True
+                if event.key == pygame.K_SPACE: 
+                    self.SPACE_KEY = True
+                if event.key == pygame.K_RETURN: 
+                    self.START_KEY = True
+                if event.key == pygame.K_ESCAPE: 
+                    self.BACK_KEY = True
 
 
     def player_events(self):
-        if self.A_KEY: # Left
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a] and self.player.x - self.player_vel > 0: 
             self.player.x -= self.player_vel
-        if self.D_KEY: # Right
+        if keys[pygame.K_d] and self.player.x + self.player_vel + self.player.get_width() < WIDTH: 
             self.player.x += self.player_vel
-        if self.W_KEY: # Up
+        if keys[pygame.K_w] and self.player.y - self.player_vel > 0:
             self.player.y -= self.player_vel
-        if self.S_KEY: # Down
+        if keys[pygame.K_s] and self.player.y + self.player_vel + self.player.get_height() < HEIGHT:
             self.player.y += self.player_vel
-        if self.SPACE_KEY: # Shoot
+        if keys[pygame.K_SPACE]:
             self.player.shoot()
-        self.reset_keys()
 
     def game_status(self):
         if self.lives <= 0 or self.player.health <= 0:
@@ -249,10 +257,11 @@ class Game:
             self.lost_count += 1
         
         if self.lost:
-            if self.lost_count > self.FPS * 3:
-                self.run = False
+            if self.lost_count > FPS * 3:
+                self.endmenu.display_menu()
             else:
-                self.game_loop()
+               pygame.quit()
+               
         if len(self.enemies) == 0: 
             self.level += 1
             self.wave_length += 5
@@ -280,8 +289,8 @@ class Game:
         self.W_KEY, self.A_KEY, self.S_KEY, self.D_KEY, self.SPACE_KEY, self.ENTER_KEY, self.BACK_KEY = False, False, False, False, False, False, False
 
     def draw_text(self, text, size, x, y ):
-        font = pygame.font.Font(self.font_name,size)
-        text_surface = font.render(text, True, self.WHITE)
+        font = pygame.font.SysFont("comicsans", size)
+        text_surface = font.render(text, True, WHITE)
         text_rect = text_surface.get_rect()
         text_rect.center = (x,y)
         self.display.blit(text_surface,text_rect)
@@ -294,10 +303,10 @@ class Menu:
         self.offset = - 100
 
     def draw_cursor(self):
-        game.draw_text('*', 15, self.cursor_rect.x, self.cursor_rect.y)
+        game.draw_text('*', 70, self.cursor_rect.x, self.cursor_rect.y)
 
     def blit_screen(self):
-        game.window.blit(game.display, (0, 0))
+        WIN.blit(game.display, (0, 0))
         pygame.display.update()
         game.reset_keys()
     
@@ -306,54 +315,100 @@ class MainMenu(Menu):
         Menu.__init__(self)
         self.state = "Start"
         self.startx, self.starty = self.mid_w, self.mid_h + 30
-        self.optionsx, self.optionsy = self.mid_w, self.mid_h + 50
-        self.creditsx, self.creditsy = self.mid_w, self.mid_h + 70
-        self.cursor_rect.midtop = (self.startx + self.offset, self.starty)
+        self.optionsx, self.optionsy = self.mid_w, self.mid_h + 70
+        self.creditsx, self.creditsy = self.mid_w, self.mid_h + 110
+        self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
     
     def display_menu(self):
         self.run_display = True
         while self.run_display:
+            game.clock.tick(FPS)
             game.check_events()
             self.check_input()
-            game.check_events()
-            game.display.fill(game.BLACK)
-            game.draw_text('Main Menu', 20, WIDTH / 2, HEIGHT / 2 - 20)
-            game.draw_text('Start Game', 20, self.startx, self.starty)
-            game.draw_text('Options', 20, self.optionsx, self.optionsy)
-            game.draw_text('Credits', 20, self.creditsx, self.creditsy)
+            game.display.fill(BLACK)
+            game.draw_text('Main Menu', 100, WIDTH / 2, HEIGHT / 2 - 100)
+            game.draw_text('Start Game', 50, self.startx, self.starty)
+            game.draw_text('Options', 50, self.optionsx, self.optionsy)
+            game.draw_text('Credits', 50, self.creditsx, self.creditsy)
+            self.draw_cursor()
+            self.blit_screen()
 
     def move_cursor(self): 
         if game.S_KEY:
             if self.state == 'Start':
-                self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy)
-                self.state == 'Options'
-            if self.state == 'Options':
-                self.cursor_rect.midtop = (self.creditsx + self.offset, self.creditsy)
-                self.state == 'Credits'
-            if self.state == 'Credits':
-                self.cursor_rect.midtop = (self.startx + self.offset, self.starty)
-                self.state == 'Start Game'
-        
-        if game.W_KEY:
+                self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
+                self.state = 'Options'
+            elif self.state == 'Options':
+                self.cursor_rect.midtop = (self.creditsx + self.offset, self.creditsy + 10)
+                self.state = 'Credits'
+            elif self.state == 'Credits':
+                self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
+                self.state = 'Start'
+        elif game.W_KEY:
             if self.state == 'Start':
-                self.cursor_rect.midtop = (self.creditsx + self.offset, self.creditsy)
-                self.state == 'Credits'
-            if self.state == 'Options':
-                self.cursor_rect.midtop = (self.startx + self.offset, self.starty)
-                self.state == 'Start'
-            if self.state == 'Credits':
-                self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy)
-                self.state == 'Options'
+                self.cursor_rect.midtop = (self.creditsx + self.offset, self.creditsy + 10)
+                self.state = 'Credits'
+            elif self.state == 'Options':
+                self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
+                self.state = 'Start'
+            elif self.state == 'Credits':
+                self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
+                self.state = 'Options'
 
     def check_input(self):
         self.move_cursor()
         if game.START_KEY:
             if self.state == 'Start':
                 game.playing = True
-            if self.state == 'Options':
-                pass
-            if self.state == 'Credits':
-                pass
+            # if self.state == 'Options':
+            #     pass
+            # if self.state == 'Credits':
+            #     pass
+            self.run_display = False
+
+class EndMenu(Menu):
+    def __init__(self):
+        Menu.__init__(self)
+        self.state = "Start"
+        self.startx, self.starty = self.mid_w, self.mid_h
+        self.exitx, self.exity = self.mid_w, self.mid_h + 30
+        self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
+    
+    def display_menu(self):
+        self.run_display = True
+        while self.run_display:
+            game.clock.tick(FPS)
+            game.check_events()
+            self.check_input()
+            game.display.fill(BLACK)
+            game.draw_text('Play Again', 50, self.startx, self.starty)
+            game.draw_text('Exit', 50, self.exitx, self.exity)
+            self.draw_cursor()
+            self.blit_screen()
+
+    def move_cursor(self): 
+        if game.S_KEY:
+            if self.state == 'Start':
+                self.cursor_rect.midtop = (self.exitx + self.offset, self.exity + 10)
+                self.state = 'Exit'
+            elif self.state == 'Exit':
+                self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
+                self.state = 'Start'
+        elif game.S_KEY:
+            if self.state == 'Start':
+                self.cursor_rect.midtop = (self.exitx + self.offset, self.exity + 10)
+                self.state = 'Exit'
+            elif self.state == 'Exit':
+                self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
+                self.state = 'Start'
+    def check_input(self):
+        self.move_cursor()
+        if game.START_KEY:
+            if self.state == 'Start':
+                game.run = True
+                game.game_loop()
+            if self.state == 'Exit':
+                pygame.quit()
             self.run_display = False
 
 game = Game()
