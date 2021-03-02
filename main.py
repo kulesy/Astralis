@@ -40,8 +40,8 @@ class Laser:
     def move(self, vel):
         self.y += vel
 
-    def off_screen(self, width):
-        return (self.x > width or self.x <= -50)
+    def off_screen(self, height):
+        return not(self.y < height and self.y >= 0)
     
     def collision(self, obj):
         return game.collide(self, obj)
@@ -67,7 +67,7 @@ class Ship:
         self.cooldown()
         for laser in self.lasers:
             laser.move(vel)
-            if laser.off_screen(WIDTH):
+            if laser.off_screen(HEIGHT):
                 self.lasers.remove(laser)
             elif laser.collision(obj):
                 obj.health -= 10
@@ -134,7 +134,7 @@ class Enemy(Ship):
         self.mask = pygame.mask.from_surface(self.ship_img)
 
     def move(self, vel):
-        self.y -= vel
+        self.y += vel
 
     def shoot(self):
         if self.cool_down_counter == 0:
@@ -164,7 +164,7 @@ class Game:
         
         self.mainmenu = MainMenu()
         self.endmenu = EndMenu()
-        self.player = Player(100, 300)
+        self.player = Player(300, 630)
         self.clock = pygame.time.Clock()
 
         self.lost_count = 0
@@ -192,7 +192,7 @@ class Game:
         self.laser_vel = 8
         self.mainmenu = MainMenu()
         self.endmenu = EndMenu()
-        self.player = Player(100, 300)
+        self.player = player = Player(300, 630)
         self.clock = pygame.time.Clock()
         self.lost_count = 0
         self.reset_keys()
@@ -288,7 +288,7 @@ class Game:
             self.level += 1
             self.wave_length += 5
             for i in range(self.wave_length):
-                enemy = Enemy(random.randrange(WIDTH, WIDTH + 1000), random.randrange(100, HEIGHT - 100), random.choice(["red", "blue", "green"]))
+                enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-1500, -100), random.choice(["red", "blue", "green"]))
                 self.enemies.append(enemy)
 
     def enemy_behaviour(self):
@@ -303,7 +303,7 @@ class Game:
                 self.player.health -= 10
                 self.enemies.remove(enemy)
                 
-            elif enemy.x - enemy.get_width() < -50:
+            elif enemy.y + enemy.get_height() > HEIGHT:
                 self.lives -= 1
                 self.enemies.remove(enemy)
     
