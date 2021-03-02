@@ -38,7 +38,7 @@ class Laser:
         window.blit(self.img, (self.x, self.y))
 
     def move(self, vel):
-        self.x -= vel
+        self.y += vel
 
     def off_screen(self, width):
         return (self.x > width or self.x <= -50)
@@ -134,7 +134,7 @@ class Enemy(Ship):
         self.mask = pygame.mask.from_surface(self.ship_img)
 
     def move(self, vel):
-        self.x -= vel
+        self.y -= vel
 
     def shoot(self):
         if self.cool_down_counter == 0:
