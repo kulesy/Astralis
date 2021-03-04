@@ -317,6 +317,10 @@ class Game:
         text_rect.center = (x,y)
         self.display.blit(text_surface,text_rect)
 
+class Interface:
+    self.game = Game()
+    
+
 class Menu:
     def __init__(self):
         self.mid_w, self.mid_h = WIDTH / 2, HEIGHT / 2
@@ -393,7 +397,7 @@ class EndMenu(Menu):
         Menu.__init__(self)
         self.state = "Start"
         self.startx, self.starty = self.mid_w, self.mid_h
-        self.exitx, self.exity = self.mid_w, self.mid_h + 30
+        self.exitx, self.exity = self.mid_w, self.mid_h + 50
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
     
     def display_menu(self):
@@ -430,7 +434,7 @@ class EndMenu(Menu):
                 game.game_reset()
                 game.game_loop()
             if self.state == 'Exit':
-                pygame.quit()
+                pass
             self.run_display = False
 
 game = Game()
