@@ -27,6 +27,9 @@ YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"
 # Background
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background-black.png")), (WIDTH, HEIGHT))
 
+# lives
+LIVES = pygame.transform.scale(pygame.image.load(os.path.join("assets", "heart.png")), (20, 20))
+
 class Laser:
     def __init__(self, x, y, img):
         self.x = x
@@ -99,6 +102,13 @@ class Player(Ship):
         self.laser_img = YELLOW_LASER
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.max_health = health
+        self.health_w = 200
+        self.health_h = 15
+        self.health_x = (WIDTH // 2) - (self.health_w // 2)
+        self.health_y = 10 
+
+        self.ability_w = self.health_w // 2
+        self.ability_h = 50
 
     def move_lasers(self, vel, objs):
         self.cooldown()
@@ -118,28 +128,22 @@ class Player(Ship):
         self.HUD(window)
 
     def HUD(self, window):
-        health_w = 200
-        health_h = 15
-        health_x = (WIDTH // 2) - (health_w // 2)
-        health_y = 10 
 
-        ability_w = health_w // 2
-        ability_h = 50
-
-        ability1 = pygame.Surface((ability_w, ability_h))
+        ability1 = pygame.Surface((self.ability_w, self.ability_h))
         ability1.set_alpha(128)
         ability1.fill((WHITE))
 
-        ability2 = pygame.Surface((ability_w, ability_h))
+        ability2 = pygame.Surface((self.ability_w, self.ability_h))
         ability2.set_alpha(128)
         ability2.fill((0,0,255))
         
-        pygame.draw.rect(window, (255,0,0), (health_x, health_y, health_w, health_h))
-        pygame.draw.rect(window, (0,255,0), (health_x, health_y, health_w * (self.health/self.max_health), health_h))
+        pygame.draw.rect(window, (255,0,0), (self.health_x, self.health_y, self.health_w, self.health_h))
+        pygame.draw.rect(window, (0,255,0), (self.health_x, self.health_y, self.health_w * (self.health/self.max_health), self.health_h))
 
-        WIN.blit(ability1, (health_x, health_h + health_y))
-        WIN.blit(ability2, ((WIDTH // 2), health_h + health_y))
+        WIN.blit(ability1, (self.health_x, self.health_h + self.health_y))
+        WIN.blit(ability2, ((WIDTH // 2), self.health_h + self.health_y))
     
+        
 
 class Enemy(Ship):
     COLOR_MAP = {
@@ -232,6 +236,7 @@ class Game:
             enemy.draw(WIN)
 
         self.player.draw(WIN)
+        self.update_lives()
 
         if self.lost == True:
             lost_label = self.lost_font.render("You Lost!!", 1, (255,255,255))
@@ -329,6 +334,10 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.center = (x,y)
         self.display.blit(text_surface,text_rect)
+    
+    def update_lives(self):
+        if self.lives == 5:
+            WIN.blit(LIVES, (self.player.health_x, (self.player.health_y + self.player.health_h + self.player.ability_h)))
 
 class Menu:
     def __init__(self):
