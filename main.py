@@ -115,11 +115,31 @@ class Player(Ship):
 
     def draw(self, window):
         super().draw(window)
-        self.healthbar(window)
+        self.HUD(window)
 
-    def healthbar(self, window):
-        pygame.draw.rect(window, (255,0,0), (WIDTH / 2, 10, self.ship_img.get_width(), 10))
-        pygame.draw.rect(window, (0,255,0), (WIDTH / 2, 10, self.ship_img.get_width() * (self.health/self.max_health), 10))
+    def HUD(self, window):
+        health_w = 200
+        health_h = 15
+        health_x = (WIDTH // 2) - (health_w // 2)
+        health_y = 10 
+
+        ability_w = health_w // 2
+        ability_h = 50
+
+        ability1 = pygame.Surface((ability_w, ability_h))
+        ability1.set_alpha(128)
+        ability1.fill((WHITE))
+
+        ability2 = pygame.Surface((ability_w, ability_h))
+        ability2.set_alpha(128)
+        ability2.fill((0,0,255))
+        
+        pygame.draw.rect(window, (255,0,0), (health_x, health_y, health_w, health_h))
+        pygame.draw.rect(window, (0,255,0), (health_x, health_y, health_w * (self.health/self.max_health), health_h))
+
+        WIN.blit(ability1, (health_x, health_h + health_y))
+        WIN.blit(ability2, ((WIDTH // 2), health_h + health_y))
+    
 
 class Enemy(Ship):
     COLOR_MAP = {
@@ -162,7 +182,7 @@ class Game:
         self.player_vel = 7
         self.laser_vel = 8
         
-        self.player = Player(300, 630)
+        self.player = Player(WIDTH // 2 - (YELLOW_SPACE_SHIP.get_width() // 2), 630)
         self.clock = pygame.time.Clock()
 
         self.lost_count = 0
