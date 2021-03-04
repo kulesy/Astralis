@@ -10,7 +10,7 @@ WIDTH, HEIGHT = 750, 750
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter Tutorial")
 
-# Load images
+# Load image
 RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_red_small.png"))
 GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_green_small.png"))
 BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
@@ -118,8 +118,8 @@ class Player(Ship):
         self.healthbar(window)
 
     def healthbar(self, window):
-        pygame.draw.rect(window, (255,0,0), (self.x, self.y + self.ship_img.get_height() + 10, self.ship_img.get_width(), 10))
-        pygame.draw.rect(window, (0,255,0), (self.x, self.y + self.ship_img.get_height() + 10, self.ship_img.get_width() * (self.health/self.max_health), 10))
+        pygame.draw.rect(window, (255,0,0), (WIDTH / 2, 10, self.ship_img.get_width(), 10))
+        pygame.draw.rect(window, (0,255,0), (WIDTH / 2, 10, self.ship_img.get_width() * (self.health/self.max_health), 10))
 
 class Enemy(Ship):
     COLOR_MAP = {
@@ -206,10 +206,8 @@ class Game:
     def redraw_window(self):
         WIN.blit(BG, (0,0))
         # Draw text
-        lives_label = self.main_font.render(f"Lives: {self.lives}", 1, (255,255,255))
         level_label = self.main_font.render(f"Level: {self.level}", 1, (255,255,255))
 
-        WIN.blit(lives_label, (10, 10))
         WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
         
         for enemy in self.enemies:
@@ -336,6 +334,10 @@ class Menu:
         pygame.display.update()
         game.reset_keys()
     
+# class HUD:
+#     def __init__(self):
+#         self.image = 
+
 class MainMenu(Menu):
     def __init__(self):
         Menu.__init__(self)
