@@ -162,8 +162,6 @@ class Game:
         self.player_vel = 7
         self.laser_vel = 8
         
-        self.mainmenu = MainMenu()
-        self.endmenu = EndMenu()
         self.player = Player(300, 630)
         self.clock = pygame.time.Clock()
 
@@ -224,8 +222,6 @@ class Game:
     def game_loop(self):
         while self.run:
             self.clock.tick(FPS)
-            if self.mainmenu.run_display == True:
-                self.mainmenu.display_menu()
             self.redraw_window()
             self.game_status()
             self.player_events()
@@ -278,7 +274,6 @@ class Game:
         if self.lost:
             if self.lost_count > FPS * 3:
                 self.run = False
-                self.endmenu.display_menu()
             else:
                 self.game_loop()
                
@@ -314,10 +309,6 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.center = (x,y)
         self.display.blit(text_surface,text_rect)
-
-class Interface:
-    self.game = Game()
-    
 
 class Menu:
     def __init__(self):
@@ -434,11 +425,17 @@ class EndMenu(Menu):
         if game.START_KEY:
             if self.state == 'Start':
                 game.game_reset()
-                game.game_loop()
             if self.state == 'Exit':
                 pass
             self.run_display = False
 
 game = Game()
-game.game_loop()
+mainmenu = MainMenu()
+endmenu = EndMenu()
+def main():
+    mainmenu.display_menu()
+    while game.run:
+        game.game_loop()
+        endmenu.display_menu()
+main()
 
