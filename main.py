@@ -44,7 +44,7 @@ class Laser:
         self.y += vel
 
     def off_screen(self, height):
-        return not(self.y < height and self.y >= 0)
+        return (self.y >= height or self.y <= -RED_LASER.get_width())
     
     def collision(self, obj):
         return game.collide(self, obj)
@@ -173,7 +173,8 @@ class Game:
         self.lost = False
        
         self.level = 0
-        self.lives = 5
+        self.hearts = 5
+        self.lives = self.hearts
         self.main_font = pygame.font.SysFont("comicsans", 50)
         self.lost_font = pygame.font.SysFont("comicsans", 60)
 
@@ -203,7 +204,8 @@ class Game:
         self.run = True
         self.lost = False
         self.level = 0
-        self.lives = 5
+        self.hearts = 5
+        self.lives = self.hearts
         self.main_font = pygame.font.SysFont("comicsans", 50)
         self.lost_font = pygame.font.SysFont("comicsans", 60)
         self.display = pygame.Surface((WIDTH, HEIGHT))
@@ -336,8 +338,10 @@ class Game:
         self.display.blit(text_surface,text_rect)
     
     def update_lives(self):
-        if self.lives == 5:
-            WIN.blit(LIVES, (self.player.health_x, (self.player.health_y + self.player.health_h + self.player.ability_h)))
+        offset = LIVES.get_width() / 2
+        for i in range(self.lives):
+            WIN.blit(LIVES, (self.player.health_x + offset, (self.player.health_y + self.player.health_h + self.player.ability_h)))
+            offset += self.player.health_w // self.hearts
 
 class Menu:
     def __init__(self):
@@ -364,7 +368,7 @@ class MainMenu(Menu):
         self.state = "Start"
         self.startx, self.starty = self.mid_w, self.mid_h + 30
         self.optionsx, self.optionsy = self.mid_w, self.mid_h + 70
-        self.creditsx, self.creditsy = self.mid_w, self.mid_h + 110
+        self.quitx, self.quity = self.mid_w, self.mid_h + 110
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
     
     def display_menu(self):
@@ -377,7 +381,7 @@ class MainMenu(Menu):
             game.draw_text('Main Menu', 100, WIDTH / 2, HEIGHT / 2 - 100)
             game.draw_text('Start Game', 50, self.startx, self.starty)
             game.draw_text('Options', 50, self.optionsx, self.optionsy)
-            game.draw_text('Credits', 50, self.creditsx, self.creditsy)
+            game.draw_text('Quit', 50, self.quitx, self.quity)
             self.draw_cursor()
             self.blit_screen()
 
@@ -387,19 +391,19 @@ class MainMenu(Menu):
                 self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
                 self.state = 'Options'
             elif self.state == 'Options':
-                self.cursor_rect.midtop = (self.creditsx + self.offset, self.creditsy + 10)
-                self.state = 'Credits'
-            elif self.state == 'Credits':
+                self.cursor_rect.midtop = (self.quitx + self.offset, self.quity + 10)
+                self.state = 'Quit'
+            elif self.state == 'Quit':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
                 self.state = 'Start'
         elif game.W_KEY:
             if self.state == 'Start':
-                self.cursor_rect.midtop = (self.creditsx + self.offset, self.creditsy + 10)
-                self.state = 'Credits'
+                self.cursor_rect.midtop = (self.quitx + self.offset, self.quity + 10)
+                self.state = 'Quit'
             elif self.state == 'Options':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
                 self.state = 'Start'
-            elif self.state == 'Credits':
+            elif self.state == 'Quit':
                 self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
                 self.state = 'Options'
 
@@ -410,8 +414,8 @@ class MainMenu(Menu):
                 game.playing = True
             # if self.state == 'Options':
             #     pass
-            # if self.state == 'Credits':
-            #     pass
+            if self.state == 'Quit':
+                game.run = False
             self.run_display = False
 
 class EndMenu(Menu):
