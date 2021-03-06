@@ -9,19 +9,21 @@ BLACK, WHITE = (0, 0, 0), (255, 255, 255)
 WIDTH, HEIGHT = 750, 750
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter Tutorial")
+HS_FILE = "highscore.txt"
 
+BLUE = pygame.transform.scale(pygame.image.load(os.path.join("assets", "pixel_laser_blue.png")), (40, 80))
 # Load image
-RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_red_small.png"))
-GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_green_small.png"))
+RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
+GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
 BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
 
 #Player 
 YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_yellow.png"))
 
 # Lasers 
-RED_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_red.png"))
-GREEN_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_green.png"))
-BLUE_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_blue.png"))
+RED_LASER = BLUE
+GREEN_LASER = BLUE
+BLUE_LASER = BLUE
 YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"))
 
 # Background
@@ -110,6 +112,8 @@ class Player(Ship):
         self.ability_w = self.health_w // 2
         self.ability_h = 50
 
+        self.score = 0
+
     def move_lasers(self, vel, objs):
         self.cooldown()
         for laser in self.lasers:
@@ -119,7 +123,14 @@ class Player(Ship):
             else:
                 for obj in objs:
                    if laser.collision(obj):
+                        if obj.color == "blue":
+                            self.score += 20
+                        elif obj.color == "green":
+                            self.score += 40
+                        elif obj.color == "red":
+                            self.score += 60    
                         objs.remove(obj)
+
                         if laser in self.lasers:
                             self.lasers.remove(laser)
 
@@ -143,7 +154,6 @@ class Player(Ship):
         WIN.blit(ability1, (self.health_x, self.health_h + self.health_y))
         WIN.blit(ability2, ((WIDTH // 2), self.health_h + self.health_y))
     
-        
 
 class Enemy(Ship):
     COLOR_MAP = {
@@ -156,13 +166,14 @@ class Enemy(Ship):
         super().__init__(x, y, health)
         self.ship_img, self.laser_img = self.COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
+        self.color = color
 
     def move(self, vel):
         self.y += vel
 
     def shoot(self):
         if self.cool_down_counter == 0:
-            laser = Laser(self.x-20, self.y, self.laser_img)
+            laser = Laser(self.x + 5, self.y, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -192,6 +203,8 @@ class Game:
 
         self.lost_count = 0
 
+        self.score = 0
+
         self.W_KEY = False
         self.A_KEY = False
         self.S_KEY = False
@@ -199,7 +212,8 @@ class Game:
         self.SPACE_KEY = False
         self.START_KEY = False
         self.BACK_KEY = False
-    
+        self.load_data()
+        
     def game_reset(self):
         self.run = True
         self.lost = False
@@ -219,9 +233,21 @@ class Game:
         self.player = player = Player(300, 630)
         self.clock = pygame.time.Clock()
         self.lost_count = 0
+        self.score = 0
         self.reset_keys()
 
-    
+    def load_data(self):
+        #load high score
+        self.dir = os.path.dirname(__file__)
+        try:
+            #try to read the file
+            with open(os.path.join(self.dir, HS_FILE), 'r+') as f:
+                self.highscore = int(f.read())
+        except:
+            #create the file
+            with open(os.path.join(self.dir, HS_FILE), 'w'):
+                self.highscore = 0
+
     def collide(self, obj1, obj2):
         offset_x = obj2.x - obj1.x
         offset_y = obj2.y - obj1.y
@@ -231,8 +257,10 @@ class Game:
         WIN.blit(BG, (0,0))
         # Draw text
         level_label = self.main_font.render(f"Level: {self.level}", 1, (255,255,255))
+        score_label = self.main_font.render(f"Score: {self.player.score}", 1, (255,255,255))
 
         WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
+        WIN.blit(score_label, (10, 10))
         
         for enemy in self.enemies:
             enemy.draw(WIN)
@@ -241,8 +269,16 @@ class Game:
         self.update_lives()
 
         if self.lost == True:
-            lost_label = self.lost_font.render("You Lost!!", 1, (255,255,255))
-            WIN.blit(lost_label, (WIDTH/2 - lost_label.get_width()/2, 350))
+            if self.highscore > self.player.score:
+                lost_label = self.lost_font.render(f"Score: {self.player.score}", 1, (255,255,255))
+                WIN.blit(lost_label, (WIDTH/2 - lost_label.get_width()/2, 350))
+            elif self.highscore <= self.player.score:
+                self.highscore = self.player.score
+                win_label = self.lost_font.render(f"New Highscore!: {self.highscore}", 1, (255,255,255))
+                WIN.blit(win_label, (WIDTH/2 - win_label.get_width()/2, 350))
+                with open(os.path.join(self.dir, HS_FILE), 'w') as f:
+                    f.write(str(self.player.score))
+
 
         pygame.display.update()
 
@@ -343,6 +379,7 @@ class Game:
             WIN.blit(LIVES, (self.player.health_x + offset, (self.player.health_y + self.player.health_h + self.player.ability_h)))
             offset += self.player.health_w // self.hearts
 
+
 class Menu:
     def __init__(self):
         self.mid_w, self.mid_h = WIDTH / 2, HEIGHT / 2
@@ -357,10 +394,6 @@ class Menu:
         WIN.blit(game.display, (0, 0))
         pygame.display.update()
         game.reset_keys()
-    
-# class HUD:
-#     def __init__(self):
-#         self.image = 
 
 class MainMenu(Menu):
     def __init__(self):
@@ -378,6 +411,7 @@ class MainMenu(Menu):
             game.check_events()
             self.check_input()
             game.display.fill(BLACK)
+            game.draw_text(f'Highscore: {str(game.highscore)}', 75, WIDTH / 2, HEIGHT / 2 - 250)
             game.draw_text('Main Menu', 100, WIDTH / 2, HEIGHT / 2 - 100)
             game.draw_text('Start Game', 50, self.startx, self.starty)
             game.draw_text('Options', 50, self.optionsx, self.optionsy)
