@@ -11,25 +11,27 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter Tutorial")
 
 # Load image
-RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_red_small.png"))
-GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_green_small.png"))
-BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
+RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "enemy_red.png"))
+RED_SPACE_SHIP.set_colorkey((BLACK))
+# GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "enemy_red.png"))
+# BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "enemy_red.png"))
 
 #Player 
-YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_yellow.png"))
-
+YELLOW_SPACE_SHIP = pygame.transform.scale(pygame.image.load(os.path.join("assets", "player.png")), (50, 50)).convert()
+YELLOW_SPACE_SHIP.set_colorkey((BLACK))
 # Lasers 
-RED_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_red.png"))
-GREEN_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_green.png"))
-BLUE_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_blue.png"))
-YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"))
-
+RED_LASER = pygame.image.load(os.path.join("assets", "laser_enemy.png")).convert()
+RED_LASER.set_colorkey((BLACK))
+# GREEN_LASER = pygame.image.load(os.path.join("assets", "laser_enemy.png"))
+# BLUE_LASER = pygame.image.load(os.path.join("assets", "laser_enemy.png"))
+YELLOW_LASER = pygame.image.load(os.path.join("assets", "laser_player.png")).convert()
+YELLOW_LASER.set_colorkey((BLACK))
 # Background
-BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background-black.png")), (WIDTH, HEIGHT))
+BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background.png")), (WIDTH, HEIGHT))
 
-# lives
-LIVES = pygame.transform.scale(pygame.image.load(os.path.join("assets", "heart.png")), (20, 20))
-
+# Lives
+LIVES = pygame.transform.scale(pygame.image.load(os.path.join("assets", "heart.png")), (25, 20))
+LIVES.set_colorkey((BLACK))
 class Laser:
     def __init__(self, x, y, img):
         self.x = x
@@ -148,8 +150,8 @@ class Player(Ship):
 class Enemy(Ship):
     COLOR_MAP = {
                 "red": (RED_SPACE_SHIP, RED_LASER),
-                "green": (GREEN_SPACE_SHIP, GREEN_LASER),
-                "blue": (BLUE_SPACE_SHIP, BLUE_LASER)
+                "green": (RED_SPACE_SHIP, RED_LASER),
+                "blue": (RED_SPACE_SHIP, RED_LASER)
                 }
 
     def __init__(self, x, y, color, health=100):
