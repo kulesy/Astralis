@@ -14,16 +14,13 @@ HS_FILE = "highscore.txt"
 BLUE = pygame.transform.scale(pygame.image.load(os.path.join("assets", "pixel_laser_blue.png")), (40, 80))
 # Load image
 RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
-GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
-BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
+
 
 #Player 
 YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_yellow.png"))
 
 # Lasers 
-RED_LASER = BLUE
-GREEN_LASER = BLUE
-BLUE_LASER = BLUE
+RED_LASER = pygame.transform.scale(pygame.image.load(os.path.join("assets", "pixel_laser_blue.png")), (40, 80))
 YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"))
 
 # Background
