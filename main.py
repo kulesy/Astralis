@@ -9,22 +9,19 @@ BLACK, WHITE = (0, 0, 0), (255, 255, 255)
 WIDTH, HEIGHT = 750, 750
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter Tutorial")
+HS_FILE = "highscore.txt"
 
 # Load image
-RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "enemy_red.png"))
+RED_SPACE_SHIP = pygame.transform.scale(pygame.image.load(os.path.join("assets", "enemy_red.png")), (50,50))
 RED_SPACE_SHIP.set_colorkey((BLACK))
-# GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "enemy_red.png"))
-# BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "enemy_red.png"))
 
 #Player 
-YELLOW_SPACE_SHIP = pygame.transform.scale(pygame.image.load(os.path.join("assets", "player.png")), (50, 50)).convert()
+YELLOW_SPACE_SHIP = pygame.transform.scale(pygame.image.load(os.path.join("assets", "player.png")), (75, 75)).convert()
 YELLOW_SPACE_SHIP.set_colorkey((BLACK))
 # Lasers 
-RED_LASER = pygame.image.load(os.path.join("assets", "laser_enemy.png")).convert()
+RED_LASER = pygame.transform.scale(pygame.image.load(os.path.join("assets", "laser_enemy.png")), (20, 30))
 RED_LASER.set_colorkey((BLACK))
-# GREEN_LASER = pygame.image.load(os.path.join("assets", "laser_enemy.png"))
-# BLUE_LASER = pygame.image.load(os.path.join("assets", "laser_enemy.png"))
-YELLOW_LASER = pygame.image.load(os.path.join("assets", "laser_player.png")).convert()
+YELLOW_LASER = pygame.transform.scale(pygame.image.load(os.path.join("assets", "laser_player.png")), (20, 30))
 YELLOW_LASER.set_colorkey((BLACK))
 # Background
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background.png")), (WIDTH, HEIGHT))
@@ -46,7 +43,7 @@ class Laser:
         self.y += vel
 
     def off_screen(self, height):
-        return not(self.y < height and self.y >= 0)
+        return (self.y >= height or self.y <= -RED_LASER.get_width())
     
     def collision(self, obj):
         return game.collide(self, obj)
@@ -112,6 +109,8 @@ class Player(Ship):
         self.ability_w = self.health_w // 2
         self.ability_h = 50
 
+        self.score = 0
+
     def move_lasers(self, vel, objs):
         self.cooldown()
         for laser in self.lasers:
@@ -121,7 +120,14 @@ class Player(Ship):
             else:
                 for obj in objs:
                    if laser.collision(obj):
+                        if obj.color == "blue":
+                            self.score += 20
+                        elif obj.color == "green":
+                            self.score += 40
+                        elif obj.color == "red":
+                            self.score += 60    
                         objs.remove(obj)
+
                         if laser in self.lasers:
                             self.lasers.remove(laser)
 
@@ -145,7 +151,6 @@ class Player(Ship):
         WIN.blit(ability1, (self.health_x, self.health_h + self.health_y))
         WIN.blit(ability2, ((WIDTH // 2), self.health_h + self.health_y))
     
-        
 
 class Enemy(Ship):
     COLOR_MAP = {
@@ -158,13 +163,14 @@ class Enemy(Ship):
         super().__init__(x, y, health)
         self.ship_img, self.laser_img = self.COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
+        self.color = color
 
     def move(self, vel):
         self.y += vel
 
     def shoot(self):
         if self.cool_down_counter == 0:
-            laser = Laser(self.x-20, self.y, self.laser_img)
+            laser = Laser(self.x + 15, self.y + 10, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -175,7 +181,8 @@ class Game:
         self.lost = False
        
         self.level = 0
-        self.lives = 5
+        self.hearts = 5
+        self.lives = self.hearts
         self.main_font = pygame.font.SysFont("comicsans", 50)
         self.lost_font = pygame.font.SysFont("comicsans", 60)
 
@@ -193,6 +200,8 @@ class Game:
 
         self.lost_count = 0
 
+        self.score = 0
+
         self.W_KEY = False
         self.A_KEY = False
         self.S_KEY = False
@@ -200,12 +209,14 @@ class Game:
         self.SPACE_KEY = False
         self.START_KEY = False
         self.BACK_KEY = False
-    
+        self.load_data()
+        
     def game_reset(self):
         self.run = True
         self.lost = False
         self.level = 0
-        self.lives = 5
+        self.hearts = 5
+        self.lives = self.hearts
         self.main_font = pygame.font.SysFont("comicsans", 50)
         self.lost_font = pygame.font.SysFont("comicsans", 60)
         self.display = pygame.Surface((WIDTH, HEIGHT))
@@ -219,9 +230,21 @@ class Game:
         self.player = player = Player(300, 630)
         self.clock = pygame.time.Clock()
         self.lost_count = 0
+        self.score = 0
         self.reset_keys()
 
-    
+    def load_data(self):
+        #load high score
+        self.dir = os.path.dirname(__file__)
+        try:
+            #try to read the file
+            with open(os.path.join(self.dir, HS_FILE), 'r+') as f:
+                self.highscore = int(f.read())
+        except:
+            #create the file
+            with open(os.path.join(self.dir, HS_FILE), 'w'):
+                self.highscore = 0
+
     def collide(self, obj1, obj2):
         offset_x = obj2.x - obj1.x
         offset_y = obj2.y - obj1.y
@@ -231,8 +254,10 @@ class Game:
         WIN.blit(BG, (0,0))
         # Draw text
         level_label = self.main_font.render(f"Level: {self.level}", 1, (255,255,255))
+        score_label = self.main_font.render(f"Score: {self.player.score}", 1, (255,255,255))
 
         WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
+        WIN.blit(score_label, (10, 10))
         
         for enemy in self.enemies:
             enemy.draw(WIN)
@@ -241,8 +266,16 @@ class Game:
         self.update_lives()
 
         if self.lost == True:
-            lost_label = self.lost_font.render("You Lost!!", 1, (255,255,255))
-            WIN.blit(lost_label, (WIDTH/2 - lost_label.get_width()/2, 350))
+            if self.highscore > self.player.score:
+                lost_label = self.lost_font.render(f"Score: {self.player.score}", 1, (255,255,255))
+                WIN.blit(lost_label, (WIDTH/2 - lost_label.get_width()/2, 350))
+            elif self.highscore <= self.player.score:
+                self.highscore = self.player.score
+                win_label = self.lost_font.render(f"New Highscore!: {self.highscore}", 1, (255,255,255))
+                WIN.blit(win_label, (WIDTH/2 - win_label.get_width()/2, 350))
+                with open(os.path.join(self.dir, HS_FILE), 'w') as f:
+                    f.write(str(self.player.score))
+
 
         pygame.display.update()
 
@@ -338,8 +371,11 @@ class Game:
         self.display.blit(text_surface,text_rect)
     
     def update_lives(self):
-        if self.lives == 5:
-            WIN.blit(LIVES, (self.player.health_x, (self.player.health_y + self.player.health_h + self.player.ability_h)))
+        offset = (LIVES.get_width() / 2 - 5)
+        for i in range(self.lives):
+            WIN.blit(LIVES, (self.player.health_x + offset, (self.player.health_y + self.player.health_h + self.player.ability_h)))
+            offset += self.player.health_w // self.hearts
+
 
 class Menu:
     def __init__(self):
@@ -355,10 +391,6 @@ class Menu:
         WIN.blit(game.display, (0, 0))
         pygame.display.update()
         game.reset_keys()
-    
-# class HUD:
-#     def __init__(self):
-#         self.image = 
 
 class MainMenu(Menu):
     def __init__(self):
@@ -366,7 +398,7 @@ class MainMenu(Menu):
         self.state = "Start"
         self.startx, self.starty = self.mid_w, self.mid_h + 30
         self.optionsx, self.optionsy = self.mid_w, self.mid_h + 70
-        self.creditsx, self.creditsy = self.mid_w, self.mid_h + 110
+        self.quitx, self.quity = self.mid_w, self.mid_h + 110
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
     
     def display_menu(self):
@@ -376,10 +408,11 @@ class MainMenu(Menu):
             game.check_events()
             self.check_input()
             game.display.fill(BLACK)
+            game.draw_text(f'Highscore: {str(game.highscore)}', 75, WIDTH / 2, HEIGHT / 2 - 250)
             game.draw_text('Main Menu', 100, WIDTH / 2, HEIGHT / 2 - 100)
             game.draw_text('Start Game', 50, self.startx, self.starty)
             game.draw_text('Options', 50, self.optionsx, self.optionsy)
-            game.draw_text('Credits', 50, self.creditsx, self.creditsy)
+            game.draw_text('Quit', 50, self.quitx, self.quity)
             self.draw_cursor()
             self.blit_screen()
 
@@ -389,19 +422,19 @@ class MainMenu(Menu):
                 self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
                 self.state = 'Options'
             elif self.state == 'Options':
-                self.cursor_rect.midtop = (self.creditsx + self.offset, self.creditsy + 10)
-                self.state = 'Credits'
-            elif self.state == 'Credits':
+                self.cursor_rect.midtop = (self.quitx + self.offset, self.quity + 10)
+                self.state = 'Quit'
+            elif self.state == 'Quit':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
                 self.state = 'Start'
         elif game.W_KEY:
             if self.state == 'Start':
-                self.cursor_rect.midtop = (self.creditsx + self.offset, self.creditsy + 10)
-                self.state = 'Credits'
+                self.cursor_rect.midtop = (self.quitx + self.offset, self.quity + 10)
+                self.state = 'Quit'
             elif self.state == 'Options':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
                 self.state = 'Start'
-            elif self.state == 'Credits':
+            elif self.state == 'Quit':
                 self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
                 self.state = 'Options'
 
@@ -412,8 +445,8 @@ class MainMenu(Menu):
                 game.playing = True
             # if self.state == 'Options':
             #     pass
-            # if self.state == 'Credits':
-            #     pass
+            if self.state == 'Quit':
+                game.run = False
             self.run_display = False
 
 class EndMenu(Menu):
