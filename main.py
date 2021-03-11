@@ -11,6 +11,7 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter Tutorial")
 HS_FILE = "highscore.txt"
 
+
 # Load image
 RED_SPACE_SHIP = pygame.transform.scale(pygame.image.load(os.path.join("assets", "enemy_red.png")), (50,50))
 RED_SPACE_SHIP.set_colorkey((BLACK))
@@ -83,7 +84,7 @@ class Ship:
 
     def shoot(self):
         if self.cool_down_counter == 0:
-            laser = Laser(self.x, self.y, self.laser_img)
+            laser = Laser(self.x + 26, self.y, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -186,7 +187,7 @@ class Game:
         self.main_font = pygame.font.SysFont("comicsans", 50)
         self.lost_font = pygame.font.SysFont("comicsans", 60)
 
-        self.display = pygame.Surface((WIDTH, HEIGHT))
+        self.display = pygame.Surface((400, 800))
 
         self.enemies = []
         self.wave_length = 5
@@ -219,7 +220,7 @@ class Game:
         self.lives = self.hearts
         self.main_font = pygame.font.SysFont("comicsans", 50)
         self.lost_font = pygame.font.SysFont("comicsans", 60)
-        self.display = pygame.Surface((WIDTH, HEIGHT))
+        self.display = pygame.Surface((100, 100))
         self.enemies = []
         self.wave_length = 5
         self.enemy_vel = 1
