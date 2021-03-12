@@ -188,9 +188,9 @@ class Game:
         self.hearts = 5
         self.lives = self.hearts
         self.main_font = text.Font(os.path.join('data', 'font', 'small_font.png'), (WHITE))
-        self.lost_font = text.Font(os.path.join('data', 'font', 'small_font.png'), (WHITE))
+        self.lost_font = text.Font(os.path.join('data', 'font', 'large_font.png'), (WHITE))
 
-        self.display = pygame.Surface((WIDTH, HEIGHT))
+        self.display = pygame.Surface((750, 750))
 
         self.enemies = []
         self.wave_length = 5
@@ -222,12 +222,12 @@ class Game:
         self.hearts = 5
         self.lives = self.hearts
         self.main_font = text.Font(os.path.join('data', 'font', 'small_font.png'), (WHITE))
-        self.lost_font = text.Font(os.path.join('data', 'font', 'small_font.png'), (WHITE))
-        self.display = pygame.Surface((WIDTH, HEIGHT))
+        self.lost_font = text.Font(os.path.join('data', 'font', 'large_font.png'), (WHITE))
+        self.display = pygame.Surface((750, 750))
         self.enemies = []
         self.wave_length = 5
         self.enemy_vel = 1
-        self.player_vel = 1
+        self.player_vel = 2
         self.laser_vel = 2
         self.mainmenu = MainMenu()
         self.endmenu = EndMenu()
@@ -268,12 +268,10 @@ class Game:
 
         if self.lost == True:
             if self.highscore > self.player.score:
-                lost_label = self.lost_font.render(f"Score: {self.player.score}", 1, (255,255,255))
-                display.blit(lost_label, (WIDTH/2 - lost_label.get_width()/2, 350))
+                lost_label = self.lost_font.render(f"Score: {self.player.score}", display, (WIDTH//2 - (self.lost_font.width(f"Score: {self.score}")//2), HEIGHT/2))
             elif self.highscore <= self.player.score:
                 self.highscore = self.player.score
-                win_label = self.lost_font.render(f"New Highscore!: {self.highscore}", 1, (255,255,255))
-                display.blit(win_label, (WIDTH/2 - win_label.get_width()/2, 350))
+                win_label = self.lost_font.render(f"New Highscore! : {self.highscore}", display, ((WIDTH//2 - 60), HEIGHT/2) )
                 with open(os.path.join(self.dir, HS_FILE), 'w') as f:
                     f.write(str(self.player.score))
         WIN.blit(pygame.transform.scale(display, (750,750)), (0,0))
@@ -379,7 +377,7 @@ class Game:
 
 class Menu:
     def __init__(self):
-        self.mid_w, self.mid_h = WIDTH / 2, HEIGHT / 2
+        self.mid_w, self.mid_h = 750 / 2, 750 / 2
         self.run_display = True
         self.cursor_rect = pygame.Rect(0, 0, 20, 20)
         self.offset = - 100
@@ -388,7 +386,7 @@ class Menu:
         game.draw_text('*', 70, self.cursor_rect.x, self.cursor_rect.y)
 
     def blit_screen(self):
-        WIN.blit(game.display, (0, 0))
+        WIN.blit((game.display), (0, 0))
         pygame.display.update()
         game.reset_keys()
 
@@ -408,8 +406,8 @@ class MainMenu(Menu):
             game.check_events()
             self.check_input()
             game.display.fill(BLACK)
-            game.draw_text(f'Highscore: {str(game.highscore)}', 75, WIDTH / 2, HEIGHT / 2 - 250)
-            game.draw_text('Main Menu', 100, WIDTH / 2, HEIGHT / 2 - 100)
+            game.draw_text(f'Highscore: {str(game.highscore)}', 75, 750 / 2, 750 / 2 - 250)
+            game.draw_text('Main Menu', 100, 750 / 2, 750 / 2 - 100)
             game.draw_text('Start Game', 50, self.startx, self.starty)
             game.draw_text('Options', 50, self.optionsx, self.optionsy)
             game.draw_text('Quit', 50, self.quitx, self.quity)
