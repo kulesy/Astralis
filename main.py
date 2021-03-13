@@ -4,11 +4,12 @@ import time
 import random
 from scripts import text 
 pygame.init()
+clock = pygame.time.Clock()
 FPS = 60
 BLACK, WHITE = (0, 0, 0), (255, 255, 255)
-WIDTH, HEIGHT = 300, 200
+WIDTH, HEIGHT = 200, 200
 WIN = pygame.display.set_mode((750, 750))
-display = pygame.Surface((300, 200))
+display = pygame.Surface((200, 200))
 pygame.display.set_caption("Space Shooter Tutorial")
 HS_FILE = "highscore.txt"
 
@@ -87,7 +88,7 @@ class Ship:
 
     def shoot(self):
         if self.cool_down_counter == 0:
-            laser = Laser(self.x, self.y, self.laser_img)
+            laser = Laser(self.x + 6, self.y, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -168,13 +169,20 @@ class Enemy(Ship):
         self.ship_img, self.laser_img = self.COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.color = color
+        self.clock = 0
 
     def move(self, vel):
-        self.y += vel
+        if self.clock > 0:
+            self.y += vel
+            self.clock = 0
+        else:
+            self.clock += 1
+
+ 
 
     def shoot(self):
         if self.cool_down_counter == 0:
-            laser = Laser(self.x, self.y, self.laser_img)
+            laser = Laser(self.x + 6, self.y + 2, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -200,7 +208,8 @@ class Game:
         self.laser_vel = 2
         
         self.player = Player(WIDTH // 2 - (YELLOW_SPACE_SHIP.get_width() // 2), 175)
-        self.clock = pygame.time.Clock()
+        
+        self.clock = 0
 
         self.lost_count = 0
 
@@ -232,7 +241,6 @@ class Game:
         self.mainmenu = MainMenu()
         self.endmenu = EndMenu()
         self.player = player = Player(WIDTH // 2 - (YELLOW_SPACE_SHIP.get_width() // 2), 175)
-        self.clock = pygame.time.Clock()
         self.lost_count = 0
         self.score = 0
         self.reset_keys()
@@ -279,7 +287,7 @@ class Game:
 
     def game_loop(self):
         while self.run:
-            self.clock.tick(FPS)
+            clock.tick(FPS)
             self.redraw_window()
             self.game_status()
             self.player_events()
@@ -369,7 +377,7 @@ class Game:
         self.display.blit(text_surface,text_rect)
     
     def update_lives(self):
-        offset = (LIVES.get_width() / 2 - 5)
+        offset = ((LIVES.get_width() / 2) - 3)
         for i in range(self.lives):
             display.blit(LIVES, (self.player.health_x + offset, (self.player.health_y + self.player.health_h + self.player.ability_h)))
             offset += self.player.health_w // self.hearts
@@ -402,7 +410,7 @@ class MainMenu(Menu):
     def display_menu(self):
         self.run_display = True
         while self.run_display:
-            game.clock.tick(FPS)
+            clock.tick(FPS)
             game.check_events()
             self.check_input()
             game.display.fill(BLACK)
@@ -458,7 +466,7 @@ class EndMenu(Menu):
     def display_menu(self):
         self.run_display = True
         while self.run_display:
-            game.clock.tick(FPS)
+            clock.tick(FPS)
             game.check_events()
             self.check_input()
             game.display.fill(BLACK)
