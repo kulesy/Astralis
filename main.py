@@ -34,6 +34,11 @@ LIVES.set_colorkey((BLACK))
 
 # Font
 font = pygame.image.load(os.path.join('data', 'font', 'small_font.png'))
+
+# Cursor
+CURSOR = pygame.image.load(os.path.join('data', 'assets', 'cursor.png'))
+CURSOR.set_colorkey((BLACK))
+
 class Laser:
     def __init__(self, x, y, img):
         self.x = x
