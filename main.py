@@ -27,7 +27,7 @@ RED_LASER.set_colorkey((BLACK))
 YELLOW_LASER = pygame.image.load(os.path.join("data", "assets", "laser_player.png"))
 YELLOW_LASER.set_colorkey((BLACK))
 # Background
-BG = pygame.transform.scale(pygame.image.load(os.path.join("data", "assets", "background.png")), (300, 200,))
+BG = pygame.transform.scale(pygame.image.load(os.path.join("data", "assets", "background.png")), (200, 200))
 
 # Lives
 LIVES = pygame.image.load(os.path.join("data", "assets", "heart.png"))
@@ -36,9 +36,13 @@ LIVES.set_colorkey((BLACK))
 # Font
 font = pygame.image.load(os.path.join('data', 'font', 'small_font.png'))
 
+# Menu
+MAIN_MENU = pygame.image.load(os.path.join('data', 'assets', 'Main_Menu.png'))
+MAIN_MENU.set_colorkey((BLACK))
+
 # Cursor
-# CURSOR = pygame.image.load(os.path.join('data', 'assets', 'cursor.png'))
-# CURSOR.set_colorkey((BLACK))
+CURSOR = pygame.image.load(os.path.join('data', 'assets', 'cursor.png'))
+CURSOR.set_colorkey((BLACK))
 
 class Laser:
     def __init__(self, x, y, img):
@@ -390,13 +394,13 @@ class Game:
 
 class Menu:
     def __init__(self):
-        self.mid_w, self.mid_h = (WIDTH - game.large_font.width(f'Highscore: {str(game.highscore)}')) / 2, 200 / 2
+        self.mid_w, self.mid_h = (WIDTH - game.large_font.width(f'Highscore: {str(game.highscore)}')) / 2, (HEIGHT / 2) + 10
         self.run_display = True
         self.cursor_rect = pygame.Rect(0, 0, 20, 20)
-        self.offset = - 10
+        self.offset = 0
 
     def draw_cursor(self):
-        game.draw_text('*', 20, self.cursor_rect.x, self.cursor_rect.y)
+        display.blit(CURSOR, (self.cursor_rect.x, self.cursor_rect.y - 7))
 
     def blit_screen(self):
         WIN.blit(pygame.transform.scale((display), (750, 750)), (0,0))
@@ -411,19 +415,24 @@ class MainMenu(Menu):
         self.optionsx, self.optionsy = self.mid_w, self.mid_h + 30
         self.quitx, self.quity = self.mid_w , self.mid_h + 50
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
-    
+        self.menu_font = text.Font(os.path.join('data', 'font', 'large_font.png'), (11, 255, 230))
+        self.menu_font_back = text.Font(os.path.join('data', 'font', 'large_font.png'), (1, 136, 165))
+        self.back_offset = 1
     def display_menu(self):
         self.run_display = True
         while self.run_display:
             clock.tick(FPS)
             game.check_events()
             self.check_input()
-            game.display.fill(BLACK)
-            game.large_font.render(f'Highscore: {str(game.highscore)}', display, ((WIDTH - game.large_font.width(f'Highscore: {str(game.highscore)}')) / 2, HEIGHT / 2 - 25))
-            game.large_font.render('Main Menu', display, ((WIDTH - game.large_font.width('Main Menu')) / 2, HEIGHT / 2 - 10))
-            game.large_font.render('Start Game', display, ((WIDTH - game.large_font.width('Start Game')) / 2, self.starty))
-            game.large_font.render('Options', display, ((WIDTH - game.large_font.width('Options')) / 2, self.optionsy))
-            game.large_font.render('Quit', display, ((WIDTH - game.large_font.width('Quit')) / 2, self.quity))
+            display.blit(MAIN_MENU, (0,0))
+            self.menu_font_back.render(f'Highscore: {str(game.highscore)}', display, ((WIDTH - game.large_font.width(f'Highscore: {str(game.highscore)}') + 2) / 2, 10 + self.back_offset))
+            self.menu_font.render(f'Highscore: {str(game.highscore)}', display, ((WIDTH - self.menu_font.width(f'Highscore: {str(game.highscore)}')) / 2, 10))
+            self.menu_font_back.render('Start Game', display, (((WIDTH  + 2 - self.menu_font.width('Start Game'))/ 2) , self.starty + self.back_offset))
+            self.menu_font.render('Start Game', display, ((WIDTH - self.menu_font.width('Start Game')) / 2, self.starty))
+            self.menu_font_back.render('Options', display, ((WIDTH + self.back_offset - self.menu_font.width('Options')) / 2 , self.optionsy + self.back_offset))
+            self.menu_font.render('Options', display, ((WIDTH - self.menu_font.width('Options')) / 2, self.optionsy))
+            self.menu_font_back.render('Quit', display, ((WIDTH + self.back_offset - self.menu_font.width('Quit'))/ 2, self.quity + self.back_offset))
+            self.menu_font.render('Quit', display, ((WIDTH - self.menu_font.width('Quit')) / 2, self.quity))
             self.draw_cursor()
             self.blit_screen()
 
