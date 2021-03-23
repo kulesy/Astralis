@@ -65,3 +65,11 @@ class Font():
             else:
                 y_offset += self.line_spacing + self.line_height
                 x_offset = 0
+    
+    def render_3D(self, text, surf1, surf2, loc, line_width=0)
+        render(text, surf1, loc, line_width=0)
+        coord = []
+        for pos in loc:
+            coord.append(pos + 2)
+        loc_new = (coord[0], coord[1])
+        render(text, surf2, loc_new, line_width=0)
