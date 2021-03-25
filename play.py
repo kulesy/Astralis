@@ -36,14 +36,6 @@ LIVES.set_colorkey((BLACK))
 # Font
 font = pygame.image.load(os.path.join('data', 'font', 'small_font.png'))
 
-# Menu
-MAIN_MENU = pygame.image.load(os.path.join('data', 'assets', 'Main_Menu.png'))
-MAIN_MENU.set_colorkey((BLACK))
-
-# Cursor
-CURSOR = pygame.image.load(os.path.join('data', 'assets', 'cursor.png'))
-CURSOR.set_colorkey((BLACK))
-
 class Laser:
     def __init__(self, x, y, img):
         self.x = x
@@ -301,7 +293,7 @@ class Game:
 
             elif self.highscore <= self.player.score:
                 self.highscore = self.player.score
-                win_label = self.end_font.render(f"New Highscore! : {self.highscore}", self.display, ((WIDTH//2 - 60), (scoreh)))
+                win_label = self.end_font_back.render(f"New Highscore! : {self.highscore}", self.display, ((WIDTH//2 - 60), (scoreh)))
                 win_label = self.end_font.render(f"New Highscore! : {self.highscore}", self.display, ((WIDTH//2 - 60) - 1, (scoreh) - 1))
                 with open(os.path.join(self.dir, HS_FILE), 'w') as f:
                     f.write(str(self.player.score))
@@ -390,13 +382,12 @@ class Game:
     def reset_keys(self):
         self.W_KEY, self.A_KEY, self.S_KEY, self.D_KEY, self.SPACE_KEY, self.START_KEY, self.BACK_KEY = False, False, False, False, False, False, False
 
-    def draw_text(self, text, size, x, y ):
-        font = pygame.font.SysFont("comicsans", size)
-        text_surface = font.render(text, True, WHITE)
-        text_rect = text_surface.get_rect()
-        text_rect.center = (x,y)
-        self.display.blit(text_surface,text_rect)
-    
+    def text_3D(self, font1, font2, text, surf, loc):
+        font1.render(text, surf, loc)
+        coord = [pos - 1 for pos in loc]
+        loc_new = (coord[0], coord[1])
+        font2.render(text, surf, loc_new)
+
     def update_lives(self):
         offset = ((LIVES.get_width() / 2) - 3)
         for i in range(self.lives):
