@@ -9,7 +9,11 @@ FPS = 60
 BLACK, WHITE = (0, 0, 0), (255, 255, 255)
 WIDTH, HEIGHT = 200, 200
 WIN = pygame.display.set_mode((750, 750))
-pygame.display.set_caption("Space Shooter Tutorial")
+pygame.display.set_caption("Astralis")
+
+# Icon
+LOGO = pygame.image.load(os.path.join('data', 'assets', 'logo.png'))
+pygame.display.set_icon(LOGO)
 
 # Menu
 MAIN_MENU = pygame.image.load(os.path.join('data', 'assets', 'Main_Menu.png'))
@@ -18,6 +22,7 @@ MAIN_MENU.set_colorkey((BLACK))
 # Cursor
 CURSOR = pygame.image.load(os.path.join('data', 'assets', 'cursor.png'))
 CURSOR.set_colorkey((BLACK))
+
 
 class Menu:
     def __init__(self):
@@ -29,9 +34,11 @@ class Menu:
         self.menu_font_back = text.Font(os.path.join('data', 'font', 'large_font.png'), (1, 136, 165))
 
     def draw_cursor(self):
+        # Display cursor
         game.display.blit(CURSOR, (self.cursor_rect.x, self.cursor_rect.y - 7))
 
-    def blit_screen(self):
+    def update_display(self):
+        # Rescale display to window
         WIN.blit(pygame.transform.scale((game.display), (750, 750)), (0,0))
         pygame.display.update()
         game.reset_keys()
@@ -45,25 +52,26 @@ class MainMenu(Menu):
         self.quitx, self.quity = self.mid_w , self.mid_h + 50
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
         self.back_offset = 1
+
     def display_menu(self):
         self.run_display = True
         while self.run_display:
+            # Lock FPS
             clock.tick(FPS)
             game.check_events()
             self.check_input()
+            # Display menu
             game.display.blit(MAIN_MENU, (0,0))
+            # Draw text
             game.text_3D(self.menu_font_back, self.menu_font, f'Highscore: {str(game.highscore)}', game.display, ((WIDTH - game.large_font.width(f'Highscore: {str(game.highscore)}') + 2) / 2, 10 + self.back_offset))
-            # self.menu_font.render(f'Highscore: {str(game.highscore)}', game.display, ((WIDTH - self.menu_font.width(f'Highscore: {str(game.highscore)}')) / 2, 10))
             game.text_3D(self.menu_font_back, self.menu_font,'Start Game', game.display, (((WIDTH  + 2 - self.menu_font.width('Start Game'))/ 2) , self.starty + self.back_offset))
-            # self.menu_font.render('Start Game', game.display, ((WIDTH - self.menu_font.width('Start Game')) / 2, self.starty))
             game.text_3D(self.menu_font_back, self.menu_font, 'Options', game.display, ((WIDTH + self.back_offset - self.menu_font.width('Options')) / 2 , self.optionsy + self.back_offset))
-            # self.menu_font.render('Options', game.display, ((WIDTH - self.menu_font.width('Options')) / 2, self.optionsy))
             game.text_3D(self.menu_font_back, self.menu_font, 'Quit', game.display, ((WIDTH + self.back_offset - self.menu_font.width('Quit'))/ 2, self.quity + self.back_offset))
-            # self.menu_font.render('Quit', game.display, ((WIDTH - self.menu_font.width('Quit')) / 2, self.quity))
             self.draw_cursor()
-            self.blit_screen()
+            self.update_display()
 
     def move_cursor(self): 
+        # Cursor Down
         if game.S_KEY:
             if self.state == 'Start':
                 self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
@@ -74,6 +82,7 @@ class MainMenu(Menu):
             elif self.state == 'Quit':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
                 self.state = 'Start'
+        # Cursor Up
         elif game.W_KEY:
             if self.state == 'Start':
                 self.cursor_rect.midtop = (self.quitx + self.offset, self.quity + 10)
@@ -99,7 +108,7 @@ class MainMenu(Menu):
 class EndMenu(Menu):
     def __init__(self):
         Menu.__init__(self)
-        self.state = "Start"
+        self.state = "Play Again?"
         self.startx, self.starty = self.mid_w, self.mid_h - 15
         self.exitx, self.exity = self.mid_w, self.mid_h + 5
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
@@ -107,46 +116,54 @@ class EndMenu(Menu):
     def display_menu(self):
         self.run_display = True
         while self.run_display:
+            # Lock FPS
             clock.tick(FPS)
             game.check_events()
             self.check_input() 
             game.display_window()
-            game.text_3D(self.menu_font, self.menu_font_back, 'Play Again?', game.display, (((WIDTH - self.menu_font.width('Play Again?')) / 2) + 1, self.starty + 1))
+            # Draw text
+            game.text_3D(self.menu_font_back, self.menu_font, 'Play Again?', game.display, (((WIDTH - self.menu_font.width('Play Again?')) / 2) + 1, self.starty + 1))
             game.text_3D(self.menu_font_back, self.menu_font, 'Exit', game.display, (((WIDTH - self.menu_font.width('Exit')) / 2) + 1, self.exity + 1))
             self.draw_cursor()
-            self.blit_screen()
+            self.update_display()
 
     def move_cursor(self): 
+        # Cursor Down
         if game.S_KEY:
-            if self.state == 'Start':
+            if self.state == 'Play Again?':
                 self.cursor_rect.midtop = (self.exitx + self.offset, self.exity + 10)
                 self.state = 'Exit'
             elif self.state == 'Exit':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
-                self.state = 'Start'
+                self.state = 'Play Again?'
+        # Cursor Up
         elif game.W_KEY:
-            if self.state == 'Start':
+            if self.state == 'Play Again?':
                 self.cursor_rect.midtop = (self.exitx + self.offset, self.exity + 10)
                 self.state = 'Exit'
             elif self.state == 'Exit':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
-                self.state = 'Start'
+                self.state = 'Play Again?'
+
     def check_input(self):
         self.move_cursor()
         if game.START_KEY:
-            if self.state == 'Start':
+            if self.state == 'Play Again?':
                 game.game_reset()
             if self.state == 'Exit':
                 pass
             self.run_display = False
-    
+
+# Making classes more accesible    
 game = play.Game()
 mainmenu = MainMenu()
 endmenu = EndMenu()
-def main():
+    
+# Running game
+def run():
     mainmenu.display_menu()
     while game.run:
         game.game_loop()
         endmenu.display_menu()
-main()
+run()
 
