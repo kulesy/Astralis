@@ -4,6 +4,7 @@ import time
 import random
 from scripts import text 
 pygame.init()
+pygame.mixer.init()
 clock = pygame.time.Clock()
 FPS = 30
 BLACK, WHITE = (0, 0, 0), (255, 255, 255)
@@ -12,11 +13,9 @@ WIN = pygame.display.set_mode((750, 750))
 display = pygame.Surface((200, 200))
 HS_FILE = "highscore.txt"
 
-
 # Load image
 RED_SPACE_SHIP = pygame.image.load(os.path.join("data", "assets", "enemy_red.png"))
 RED_SPACE_SHIP.set_colorkey((BLACK))
-
 # Player 
 YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("data", "assets", "player.png"))
 YELLOW_SPACE_SHIP.set_colorkey((BLACK))
@@ -25,13 +24,13 @@ RED_LASER = pygame.image.load(os.path.join("data", "assets", "laser_enemy.png"))
 RED_LASER.set_colorkey((BLACK))
 YELLOW_LASER = pygame.image.load(os.path.join("data", "assets", "laser_player.png"))
 YELLOW_LASER.set_colorkey((BLACK))
+LASER1 = pygame.mixer.Sound(os.path.join("data", "sounds", "shoot1.wav"))
+LASER2 = pygame.mixer.Sound(os.path.join("data", "sounds", "shoot2.wav"))
 # Background
 BG = pygame.transform.scale(pygame.image.load(os.path.join("data", "assets", "background.png")), (200, 200))
-
 # Lives
 LIVES = pygame.image.load(os.path.join("data", "assets", "heart.png"))
 LIVES.set_colorkey((BLACK))
-
 # Font
 font = pygame.image.load(os.path.join('data', 'font', 'small_font.png'))
 
@@ -55,7 +54,7 @@ class Laser:
         return game.collide(self, obj)
 
 class Ship:
-    COOLDOWN = 15
+    COOLDOWN = 20
     def __init__(self, x, y, health=100):
         self.x = x
         self.y = y 
@@ -70,7 +69,8 @@ class Ship:
         window.blit(self.ship_img, (self.x, self.y))
         # Draw each laser to window
         for laser in self.lasers:
-            laser.draw(window)
+            if not laser.off_screen(HEIGHT):
+                laser.draw(window)
 
     def move_lasers(self, vel, obj):
         self.cooldown()
@@ -78,8 +78,8 @@ class Ship:
         for laser in self.lasers:
             laser.move(vel)
             if laser.off_screen(HEIGHT):
-                self.lasers.remove(laser)
-            elif laser.collision(obj):
+                self.lasers.remove(laser) 
+            if laser.collision(obj):
                 obj.health -= 10
                 self.lasers.remove(laser)
 
@@ -92,6 +92,7 @@ class Ship:
 
     def shoot(self):
         if self.cool_down_counter == 0:
+            LASER1.play()
             laser = Laser(self.x + 6, self.y, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
@@ -169,6 +170,8 @@ class Enemy(Ship):
     def shoot(self):
         if self.cool_down_counter == 0:
             laser = Laser(self.x + 6, self.y + 2, self.laser_img)
+            if not laser.off_screen(HEIGHT):
+                LASER2.play()
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -243,7 +246,7 @@ class Game:
     
     def display_window(self):
         self.display.blit(BG, (0,0))
-        # Draw text
+        # Draw HUD text
         level_label = self.small_font.render(f"Level: {self.level}", self.display, (WIDTH - self.small_font.width(f"Level: {self.level}") - 10, 10))
         score_label = self.small_font.render(f"Score: {self.player.score}", self.display, (10, 10))
         # Display each enemy
@@ -254,7 +257,7 @@ class Game:
         self.update_lives()
         # Player loss
         if self.lost == True:
-            scorew = (WIDTH//2 - (self.large_font.width(f"Score: {self.score}")//2))
+            scorew = (WIDTH - (self.large_font.width(f"Score: {self.score}")))//2
             scoreh = HEIGHT/2 - 20
             # Not highscore
             if self.highscore > self.player.score:
@@ -329,7 +332,7 @@ class Game:
             self.level += 1
             self.wave_length += 5
             for i in range(self.wave_length): # Set enemies for wave
-                enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-1500, -100), random.choice(["red", "blue", "green"]))
+                enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-500, -100), random.choice(["red", "blue", "green"]))
                 self.enemies.append(enemy)
 
     def enemy_behaviour(self):
