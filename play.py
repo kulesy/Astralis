@@ -14,25 +14,25 @@ display = pygame.Surface((200, 200))
 HS_FILE = "highscore.txt"
 
 # Load image
-RED_SPACE_SHIP = pygame.image.load(os.path.join("data", "assets", "enemy_red.png"))
+RED_SPACE_SHIP = pygame.image.load(os.path.join('Astralis', "data", "assets", "enemy_red.png"))
 RED_SPACE_SHIP.set_colorkey((BLACK))
 # Player 
-YELLOW_SPACE_SHIP = pygame.image.load(os.path.join("data", "assets", "player.png"))
+YELLOW_SPACE_SHIP = pygame.image.load(os.path.join('Astralis', "data", "assets", "player.png"))
 YELLOW_SPACE_SHIP.set_colorkey((BLACK))
 # Lasers 
-RED_LASER = pygame.image.load(os.path.join("data", "assets", "laser_enemy.png"))
+RED_LASER = pygame.image.load(os.path.join('Astralis', "data", "assets", "laser_enemy.png"))
 RED_LASER.set_colorkey((BLACK))
-YELLOW_LASER = pygame.image.load(os.path.join("data", "assets", "laser_player.png"))
+YELLOW_LASER = pygame.image.load(os.path.join('Astralis', "data", "assets", "laser_player.png"))
 YELLOW_LASER.set_colorkey((BLACK))
-LASER1 = pygame.mixer.Sound(os.path.join("data", "sounds", "shoot1.wav"))
-LASER2 = pygame.mixer.Sound(os.path.join("data", "sounds", "shoot2.wav"))
+LASER1 = pygame.mixer.Sound(os.path.join('Astralis', "data", "sounds", "shoot1.wav"))
+LASER2 = pygame.mixer.Sound(os.path.join('Astralis', "data", "sounds", "shoot2.wav"))
 # Background
-BG = pygame.transform.scale(pygame.image.load(os.path.join("data", "assets", "background.png")), (200, 200))
+BG = pygame.transform.scale(pygame.image.load(os.path.join('Astralis', "data", "assets", "background.png")), (200, 200))
 # Lives
-LIVES = pygame.image.load(os.path.join("data", "assets", "heart.png"))
+LIVES = pygame.image.load(os.path.join('Astralis', "data", "assets", "heart.png"))
 LIVES.set_colorkey((BLACK))
 # Font
-font = pygame.image.load(os.path.join('data', 'font', 'small_font.png'))
+font = pygame.image.load(os.path.join('Astralis', 'data', 'font', 'small_font.png'))
 
 class Laser:
     def __init__(self, x, y, img):
@@ -105,7 +105,7 @@ class Ship:
 
 
 class Player(Ship):
-    def __init__(self, x, y, health=5):
+    def __init__(self, x, y, health=100):
         super().__init__(x, y, health)
         self.ship_img = YELLOW_SPACE_SHIP   
         self.laser_img = YELLOW_LASER
@@ -114,11 +114,7 @@ class Player(Ship):
         self.health_w = 60
         self.health_h = 3
         self.health_x = (WIDTH // 2) - (self.health_w // 2)
-        self.health_y = 2
-
-        self.ability_w = self.health_w // 2
-        self.ability_h = 10
-
+        self.health_y = 10
         self.score = 0
 
     def move_lasers(self, vel, objs):
@@ -184,10 +180,10 @@ class Game:
         self.level = 0
         self.hearts = 5
         self.lives = self.hearts
-        self.small_font = text.Font(os.path.join('data', 'font', 'small_font.png'), (WHITE))
-        self.large_font = text.Font(os.path.join('data', 'font', 'large_font.png'), (WHITE))
-        self.end_font = text.Font(os.path.join('data', 'font', 'large_font.png'), (11, 255, 230))
-        self.end_font_back = text.Font(os.path.join('data', 'font', 'large_font.png'), (1, 136, 165))
+        self.small_font = text.Font(os.path.join('Astralis', 'data', 'font', 'small_font.png'), (WHITE))
+        self.large_font = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (WHITE))
+        self.end_font = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (11, 255, 230))
+        self.end_font_back = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (1, 136, 165))
 
 
         self.display = pygame.Surface((200,200))
@@ -224,11 +220,11 @@ class Game:
         self.dir = os.path.dirname(__file__)
         try:
             #try to read the file
-            with open(os.path.join(self.dir, HS_FILE), 'r+') as f:
+            with open(os.path.join('Astralis', self.dir, HS_FILE), 'r+') as f:
                 self.highscore = int(f.read())
         except:
             #create the file
-            with open(os.path.join(self.dir, HS_FILE), 'w'):
+            with open(os.path.join('Astralis', self.dir, HS_FILE), 'w'):
                 self.highscore = 0
 
     def collide(self, obj1, obj2):
@@ -246,9 +242,9 @@ class Game:
     
     def display_window(self):
         self.display.blit(BG, (0,0))
-        # Draw HUD text
-        level_label = self.small_font.render(f"Level: {self.level}", self.display, (WIDTH - self.small_font.width(f"Level: {self.level}") - 10, 10))
-        score_label = self.small_font.render(f"Score: {self.player.score}", self.display, (10, 10))
+        # Draw level and score HUD
+        self.small_font.render(f"Level: {self.level}", self.display, (WIDTH - self.small_font.width(f"Level: {self.level}") - 10, self.player.health_y))
+        self.small_font.render(f"Score: {self.player.score}", self.display, (10, self.player.health_y))
         # Display each enemy
         for enemy in self.enemies:
             enemy.draw(self.display)
@@ -266,7 +262,7 @@ class Game:
             elif self.highscore <= self.player.score:
                 self.highscore = self.player.score
                 self.text_3D(self.end_font_back, self.end_font, f"New Highscore! : {self.highscore}", self.display, ((WIDTH//2 - 60), (scoreh)))
-                with open(os.path.join(self.dir, HS_FILE), 'w') as f:
+                with open(os.path.join('Astralis', self.dir, HS_FILE), 'w') as f:
                     f.write(str(self.player.score))
 
     def game_loop(self):
@@ -322,7 +318,7 @@ class Game:
             self.lost = True
         
         if self.lost:
-            while self.lost_count < FPS * 3: # Wait 3 Sec
+            while self.lost_count < FPS * 3: # Wait 3 Sec until displaying endmenu
                 clock.tick(FPS)
                 self.redraw_window()
                 self.lost_count += 1
@@ -363,7 +359,7 @@ class Game:
     def update_lives(self):
         offset = ((LIVES.get_width() / 2) - 3)
         for i in range(self.lives):
-            self.display.blit(LIVES, (self.player.health_x + offset, (self.player.health_y + self.player.health_h + self.player.ability_h)))
+            self.display.blit(LIVES, (self.player.health_x + offset, (self.player.health_y + self.player.health_h + 2)))
             offset += self.player.health_w // self.hearts
 
 game = Game()

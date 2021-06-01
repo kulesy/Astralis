@@ -12,15 +12,15 @@ WIN = pygame.display.set_mode((750, 750))
 pygame.display.set_caption("Astralis")
 
 # Icon
-LOGO = pygame.image.load(os.path.join('data', 'assets', 'logo.png'))
+LOGO = pygame.image.load(os.path.join('Astralis', 'data', 'assets', 'logo.png'))
 pygame.display.set_icon(LOGO)
 
 # Menu
-MAIN_MENU = pygame.image.load(os.path.join('data', 'assets', 'Main_Menu.png'))
+MAIN_MENU = pygame.image.load(os.path.join('Astralis', 'data', 'assets', 'Main_Menu.png'))
 MAIN_MENU.set_colorkey((BLACK))
 
 # Cursor
-CURSOR = pygame.image.load(os.path.join('data', 'assets', 'cursor.png'))
+CURSOR = pygame.image.load(os.path.join('Astralis', 'data', 'assets', 'cursor.png'))
 CURSOR.set_colorkey((BLACK))
 
 
@@ -30,8 +30,8 @@ class Menu:
         self.run_display = True
         self.cursor_rect = pygame.Rect(0, 0, 20, 20)
         self.offset = 0
-        self.menu_font = text.Font(os.path.join('data', 'font', 'large_font.png'), (11, 255, 230))
-        self.menu_font_back = text.Font(os.path.join('data', 'font', 'large_font.png'), (1, 136, 165))
+        self.menu_font = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (11, 255, 230))
+        self.menu_font_back = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (1, 136, 165))
 
     def draw_cursor(self):
         # Display cursor
@@ -48,8 +48,7 @@ class MainMenu(Menu):
         Menu.__init__(self)
         self.state = "Start"
         self.startx, self.starty = self.mid_w , self.mid_h + 10
-        self.optionsx, self.optionsy = self.mid_w, self.mid_h + 30
-        self.quitx, self.quity = self.mid_w , self.mid_h + 50
+        self.quitx, self.quity = self.mid_w , self.mid_h + 30
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
         self.back_offset = 1
 
@@ -65,7 +64,6 @@ class MainMenu(Menu):
             # Draw text
             game.text_3D(self.menu_font_back, self.menu_font, f'Highscore: {str(game.highscore)}', game.display, ((WIDTH - game.large_font.width(f'Highscore: {str(game.highscore)}') + 2) / 2, 10 + self.back_offset))
             game.text_3D(self.menu_font_back, self.menu_font,'Start Game', game.display, (((WIDTH  + 2 - self.menu_font.width('Start Game'))/ 2) , self.starty + self.back_offset))
-            game.text_3D(self.menu_font_back, self.menu_font, 'Options', game.display, ((WIDTH + self.back_offset - self.menu_font.width('Options')) / 2 , self.optionsy + self.back_offset))
             game.text_3D(self.menu_font_back, self.menu_font, 'Quit', game.display, ((WIDTH + self.back_offset - self.menu_font.width('Quit'))/ 2, self.quity + self.back_offset))
             self.draw_cursor()
             self.update_display()
@@ -74,9 +72,6 @@ class MainMenu(Menu):
         # Cursor Down
         if game.S_KEY:
             if self.state == 'Start':
-                self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
-                self.state = 'Options'
-            elif self.state == 'Options':
                 self.cursor_rect.midtop = (self.quitx + self.offset, self.quity + 10)
                 self.state = 'Quit'
             elif self.state == 'Quit':
@@ -87,20 +82,15 @@ class MainMenu(Menu):
             if self.state == 'Start':
                 self.cursor_rect.midtop = (self.quitx + self.offset, self.quity + 10)
                 self.state = 'Quit'
-            elif self.state == 'Options':
+            elif self.state == 'Quit':
                 self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
                 self.state = 'Start'
-            elif self.state == 'Quit':
-                self.cursor_rect.midtop = (self.optionsx + self.offset, self.optionsy + 10)
-                self.state = 'Options'
 
     def check_input(self):
         self.move_cursor()
         if game.START_KEY:
             if self.state == 'Start':
                 game.playing = True
-            # if self.state == 'Options':
-            #     pass
             if self.state == 'Quit':
                 game.run = False
             self.run_display = False
