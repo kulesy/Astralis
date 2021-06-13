@@ -12,15 +12,15 @@ WIN = pygame.display.set_mode((750, 750))
 pygame.display.set_caption("Astralis")
 
 # Icon
-LOGO = pygame.image.load(os.path.join('Astralis', 'data', 'assets', 'logo.png'))
+LOGO = pygame.image.load(os.path.join( 'data', 'assets', 'logo.png'))
 pygame.display.set_icon(LOGO)
 
 # Menu
-MAIN_MENU = pygame.image.load(os.path.join('Astralis', 'data', 'assets', 'Main_Menu.png'))
+MAIN_MENU = pygame.image.load(os.path.join( 'data', 'assets', 'Main_Menu.png'))
 MAIN_MENU.set_colorkey((BLACK))
 
 # Cursor
-CURSOR = pygame.image.load(os.path.join('Astralis', 'data', 'assets', 'cursor.png'))
+CURSOR = pygame.image.load(os.path.join( 'data', 'assets', 'cursor.png'))
 CURSOR.set_colorkey((BLACK))
 
 
@@ -30,8 +30,8 @@ class Menu:
         self.run_display = True
         self.cursor_rect = pygame.Rect(0, 0, 20, 20)
         self.offset = 0
-        self.menu_font = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (11, 255, 230))
-        self.menu_font_back = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (1, 136, 165))
+        self.menu_font = text.Font(os.path.join( 'data', 'font', 'large_font.png'), (11, 255, 230))
+        self.menu_font_back = text.Font(os.path.join( 'data', 'font', 'large_font.png'), (1, 136, 165))
 
     def draw_cursor(self):
         # Display cursor
@@ -53,15 +53,16 @@ class MainMenu(Menu):
         self.back_offset = 1
 
     def display_menu(self):
+        #Display menu to the window
         self.run_display = True
         while self.run_display:
-            # Lock FPS
+            # Lock the Frames per second of the game
             clock.tick(FPS)
             game.check_events()
             self.check_input()
-            # Display menu
+            # Display the menu to the window
             game.display.blit(MAIN_MENU, (0,0))
-            # Draw text
+            # Draw the text to the window
             game.text_3D(self.menu_font_back, self.menu_font, f'Highscore: {str(game.highscore)}', game.display, ((WIDTH - game.large_font.width(f'Highscore: {str(game.highscore)}') + 2) / 2, 10 + self.back_offset))
             game.text_3D(self.menu_font_back, self.menu_font,'Start Game', game.display, (((WIDTH  + 2 - self.menu_font.width('Start Game'))/ 2) , self.starty + self.back_offset))
             game.text_3D(self.menu_font_back, self.menu_font, 'Quit', game.display, ((WIDTH + self.back_offset - self.menu_font.width('Quit'))/ 2, self.quity + self.back_offset))
@@ -87,6 +88,7 @@ class MainMenu(Menu):
                 self.state = 'Start'
 
     def check_input(self):
+        #When the player presses enter check which state the cursor is on
         self.move_cursor()
         if game.START_KEY:
             if self.state == 'Start':
@@ -104,14 +106,15 @@ class EndMenu(Menu):
         self.cursor_rect.midtop = (self.startx + self.offset, self.starty + 10)
 
     def display_menu(self):
+        #Display menu to the window
         self.run_display = True
         while self.run_display:
-            # Lock FPS
+            # Lock the Frames per second of the game
             clock.tick(FPS)
             game.check_events()
             self.check_input() 
             game.display_window()
-            # Draw text
+            # Draw the text to the window
             game.text_3D(self.menu_font_back, self.menu_font, 'Play Again?', game.display, (((WIDTH - self.menu_font.width('Play Again?')) / 2) + 1, self.starty + 1))
             game.text_3D(self.menu_font_back, self.menu_font, 'Exit', game.display, (((WIDTH - self.menu_font.width('Exit')) / 2) + 1, self.exity + 1))
             self.draw_cursor()
@@ -136,6 +139,7 @@ class EndMenu(Menu):
                 self.state = 'Play Again?'
 
     def check_input(self):
+        #When the player presses enter check which state the cursor is on
         self.move_cursor()
         if game.START_KEY:
             if self.state == 'Play Again?':
@@ -144,16 +148,17 @@ class EndMenu(Menu):
                 pass
             self.run_display = False
 
-# Making classes more accesible    
+# Instantiating all my classes    
 game = play.Game()
 mainmenu = MainMenu()
 endmenu = EndMenu()
     
-# Running game
+# Function to run each stage of the game 
 def run():
     mainmenu.display_menu()
     while game.run:
         game.game_loop()
         endmenu.display_menu()
+#Run the game
 run()
 

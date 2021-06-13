@@ -14,25 +14,25 @@ display = pygame.Surface((200, 200))
 HS_FILE = "highscore.txt"
 
 # Load image
-RED_SPACE_SHIP = pygame.image.load(os.path.join('Astralis', "data", "assets", "enemy_red.png"))
+RED_SPACE_SHIP = pygame.image.load(os.path.join( "data", "assets", "enemy_red.png"))
 RED_SPACE_SHIP.set_colorkey((BLACK))
 # Player 
-YELLOW_SPACE_SHIP = pygame.image.load(os.path.join('Astralis', "data", "assets", "player.png"))
+YELLOW_SPACE_SHIP = pygame.image.load(os.path.join( "data", "assets", "player.png"))
 YELLOW_SPACE_SHIP.set_colorkey((BLACK))
 # Lasers 
-RED_LASER = pygame.image.load(os.path.join('Astralis', "data", "assets", "laser_enemy.png"))
+RED_LASER = pygame.image.load(os.path.join( "data", "assets", "laser_enemy.png"))
 RED_LASER.set_colorkey((BLACK))
-YELLOW_LASER = pygame.image.load(os.path.join('Astralis', "data", "assets", "laser_player.png"))
+YELLOW_LASER = pygame.image.load(os.path.join( "data", "assets", "laser_player.png"))
 YELLOW_LASER.set_colorkey((BLACK))
-LASER1 = pygame.mixer.Sound(os.path.join('Astralis', "data", "sounds", "shoot1.wav"))
-LASER2 = pygame.mixer.Sound(os.path.join('Astralis', "data", "sounds", "shoot2.wav"))
+LASER1 = pygame.mixer.Sound(os.path.join( "data", "sounds", "shoot1.wav"))
+LASER2 = pygame.mixer.Sound(os.path.join( "data", "sounds", "shoot2.wav"))
 # Background
-BG = pygame.transform.scale(pygame.image.load(os.path.join('Astralis', "data", "assets", "background.png")), (200, 200))
+BG = pygame.transform.scale(pygame.image.load(os.path.join( "data", "assets", "background.png")), (200, 200))
 # Lives
-LIVES = pygame.image.load(os.path.join('Astralis', "data", "assets", "heart.png"))
+LIVES = pygame.image.load(os.path.join( "data", "assets", "heart.png"))
 LIVES.set_colorkey((BLACK))
 # Font
-font = pygame.image.load(os.path.join('Astralis', 'data', 'font', 'small_font.png'))
+font = pygame.image.load(os.path.join( 'data', 'font', 'small_font.png'))
 
 class Laser:
     def __init__(self, x, y, img):
@@ -65,16 +65,16 @@ class Ship:
         self.cool_down_counter = 0
 
     def draw(self, window):
-        # Draw player ship
+        # Display the player ship to the window
         window.blit(self.ship_img, (self.x, self.y))
-        # Draw each laser to window
+        # Draw each laser in the list to the screen
         for laser in self.lasers:
             if not laser.off_screen(HEIGHT):
                 laser.draw(window)
 
     def move_lasers(self, vel, obj):
         self.cooldown()
-        # Move each laser & check player collisions
+        # Move each laser & check its collisions with the player
         for laser in self.lasers:
             laser.move(vel)
             if laser.off_screen(HEIGHT):
@@ -84,7 +84,7 @@ class Ship:
                 self.lasers.remove(laser)
 
     def cooldown(self):
-        # Player laser cooldown
+        # Wait for cooldown before shooting next laser
         if self.cool_down_counter >= self.COOLDOWN:
             self.cool_down_counter = 0
         elif self.cool_down_counter > 0:
@@ -139,11 +139,12 @@ class Player(Ship):
                             self.lasers.remove(laser)
 
     def draw(self, window):
+        # Draw the display and HUD to the window
         super().draw(window)
         self.HUD(window)
 
     def HUD(self, window):      
-        # Draw Health
+        # Display the healthbar
         pygame.draw.rect(window, (255,0,0), (self.health_x, self.health_y, self.health_w, self.health_h))
         pygame.draw.rect(window, (0,255,0), (self.health_x, self.health_y, self.health_w * (self.health/self.max_health), self.health_h))   
 
@@ -161,9 +162,11 @@ class Enemy(Ship):
         self.color = color
 
     def move(self, vel):
+        # Move enemy down
         self.y += 1
 
     def shoot(self):
+        # Shoot the enemy laser if the cooldown is zero and the enemy is not offscreen
         if self.cool_down_counter == 0:
             laser = Laser(self.x + 6, self.y + 2, self.laser_img)
             if not laser.off_screen(HEIGHT):
@@ -180,10 +183,10 @@ class Game:
         self.level = 0
         self.hearts = 5
         self.lives = self.hearts
-        self.small_font = text.Font(os.path.join('Astralis', 'data', 'font', 'small_font.png'), (WHITE))
-        self.large_font = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (WHITE))
-        self.end_font = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (11, 255, 230))
-        self.end_font_back = text.Font(os.path.join('Astralis', 'data', 'font', 'large_font.png'), (1, 136, 165))
+        self.small_font = text.Font(os.path.join( 'data', 'font', 'small_font.png'), (WHITE))
+        self.large_font = text.Font(os.path.join( 'data', 'font', 'large_font.png'), (WHITE))
+        self.end_font = text.Font(os.path.join( 'data', 'font', 'large_font.png'), (11, 255, 230))
+        self.end_font_back = text.Font(os.path.join( 'data', 'font', 'large_font.png'), (1, 136, 165))
 
 
         self.display = pygame.Surface((200,200))
@@ -213,25 +216,26 @@ class Game:
         self.load_data()
         
     def game_reset(self):
+        #Reset the game from scratch
         self.__init__()
 
     def load_data(self):
-        #load high score
+        #Load high score file from directory
         self.dir = os.path.dirname(__file__)
         try:
             #try to read the file
-            with open(os.path.join('Astralis', self.dir, HS_FILE), 'r+') as f:
+            with open(os.path.join( self.dir, HS_FILE), 'r+') as f:
                 self.highscore = int(f.read())
         except:
             #create the file
-            with open(os.path.join('Astralis', self.dir, HS_FILE), 'w'):
+            with open(os.path.join( self.dir, HS_FILE), 'w'):
                 self.highscore = 0
 
     def collide(self, obj1, obj2):
         # Take the difference of two obj
         offset_x = obj2.x - obj1.x
         offset_y = obj2.y - obj1.y
-        # Check if objs overlap
+        # Check if objects overlap with each other, if they do return true, if not return false
         return obj1.mask.overlap(obj2.mask, (offset_x, offset_y)) != None
 
     def redraw_window(self):
@@ -242,27 +246,27 @@ class Game:
     
     def display_window(self):
         self.display.blit(BG, (0,0))
-        # Draw level and score HUD
+        # Draw level and score HUD to display
         self.small_font.render(f"Level: {self.level}", self.display, (WIDTH - self.small_font.width(f"Level: {self.level}") - 10, self.player.health_y))
         self.small_font.render(f"Score: {self.player.score}", self.display, (10, self.player.health_y))
-        # Display each enemy
+        # Display each enemy om the enemies list
         for enemy in self.enemies:
             enemy.draw(self.display)
         # Display player
         self.player.draw(self.display)
         self.update_lives()
-        # Player loss
+        # If you lose, show your score
         if self.lost == True:
             scorew = (WIDTH - (self.large_font.width(f"Score: {self.score}")))//2
             scoreh = HEIGHT/2 - 20
-            # Not highscore
+            # If score is less than highscore, no highscore
             if self.highscore > self.player.score:
                 self.text_3D(self.end_font_back, self.end_font, f"Score: {self.player.score}", self.display, (scorew, scoreh))
-             # New highscore
+             # If score is more than highscore, you have the highscore
             elif self.highscore <= self.player.score:
                 self.highscore = self.player.score
                 self.text_3D(self.end_font_back, self.end_font, f"New Highscore! : {self.highscore}", self.display, ((WIDTH//2 - 60), (scoreh)))
-                with open(os.path.join('Astralis', self.dir, HS_FILE), 'w') as f:
+                with open(os.path.join( self.dir, HS_FILE), 'w') as f:
                     f.write(str(self.player.score))
 
     def game_loop(self):
@@ -327,12 +331,12 @@ class Game:
         if len(self.enemies) == 0: # New Wave
             self.level += 1
             self.wave_length += 5
-            for i in range(self.wave_length): # Set enemies for wave
+            for i in range(self.wave_length): # Set enemies for current wave
                 enemy = Enemy(random.randrange(50, WIDTH-100), random.randrange(-500, -100), random.choice(["red", "blue", "green"]))
                 self.enemies.append(enemy)
 
     def enemy_behaviour(self):
-        for enemy in self.enemies[:]: # Moving enemies
+        for enemy in self.enemies[:]: # Move enemies and lasers in the list of enemies
             enemy.move(self.enemy_vel)
             enemy.move_lasers(self.laser_vel, self.player)
 
@@ -347,19 +351,21 @@ class Game:
                 self.lives -= 1
                 self.enemies.remove(enemy)
     
-    def reset_keys(self):
+    def reset_keys(self): #Reset keys to false
         self.W_KEY, self.A_KEY, self.S_KEY, self.D_KEY, self.SPACE_KEY, self.START_KEY, self.BACK_KEY = False, False, False, False, False, False, False 
 
-    def text_3D(self, font1, font2, text, surf, loc):
+    def text_3D(self, font1, font2, text, surf, loc): #Draw 3D effect text to screen
         font1.render(text, surf, loc)
         coord = [pos - 1 for pos in loc]
         loc_new = (coord[0], coord[1])
         font2.render(text, surf, loc_new)
 
-    def update_lives(self):
+    def update_lives(self): #Update the amount of lives you have
         offset = ((LIVES.get_width() / 2) - 3)
         for i in range(self.lives):
             self.display.blit(LIVES, (self.player.health_x + offset, (self.player.health_y + self.player.health_h + 2)))
             offset += self.player.health_w // self.hearts
 
-game = Game()
+game = Game() #Instantiate game
+
+# Credit to framework of my game https://www.youtube.com/watch?v=Q-__8Xw9KTM Tech With Tim
