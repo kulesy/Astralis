@@ -246,14 +246,14 @@ class Game:
     
     def display_window(self):
         self.display.blit(BG, (0,0))
-        # Draw level and score HUD to display
-        self.small_font.render(f"Level: {self.level}", self.display, (WIDTH - self.small_font.width(f"Level: {self.level}") - 10, self.player.health_y))
-        self.small_font.render(f"Score: {self.player.score}", self.display, (10, self.player.health_y))
         # Display each enemy om the enemies list
         for enemy in self.enemies:
             enemy.draw(self.display)
         # Display player
         self.player.draw(self.display)
+        # Draw level and score HUD to display
+        self.small_font.render(f"Level: {self.level}", self.display, (WIDTH - self.small_font.width(f"Level: {self.level}") - 10, self.player.health_y))
+        self.small_font.render(f"Score: {self.player.score}", self.display, (10, self.player.health_y))
         self.update_lives()
         # If you lose, show your score
         if self.lost == True:
